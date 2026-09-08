@@ -1,0 +1,84 @@
+{
+  "title": "LaCrosse Jeelink",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Jeelink verbinden",
+        "description": "Konfiguriere die serielle Verbindung zum Jeelink. Öffne danach bei der Integration Konfigurieren, um LaCrosse-Sensoren hinzuzufügen.",
+        "data": {
+          "device": "Serielles Gerät",
+          "baud": "Baudrate"
+        },
+        "data_description": {
+          "device": "Meist /dev/ttyUSB0. Wenn vorhanden, ist ein stabiler Pfad unter /dev/serial/by-id/... besser.",
+          "baud": "Die meisten Jeelink-Setups verwenden 57600 Baud."
+        }
+      },
+      "reconfigure": {
+        "title": "Serielle Verbindung ändern",
+        "data": {
+          "device": "Serielles Gerät",
+          "baud": "Baudrate"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieses serielle Gerät ist bereits konfiguriert.",
+      "unique_id_mismatch": "Das gewählte Gerät passt nicht zu diesem Konfigurationseintrag.",
+      "reconfigure_successful": "Die serielle Verbindung wurde erfolgreich aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "LaCrosse-Sensoren verwalten",
+        "menu_options": {
+          "add_sensor": "Sensor hinzufügen",
+          "remove_sensor": "Sensor entfernen"
+        }
+      },
+      "add_sensor": {
+        "title": "LaCrosse-Sensor hinzufügen",
+        "description": "Füge einen physischen LaCrosse-Sensor hinzu. Temperatur, Luftfeuchtigkeit und Batteriewarnung werden unter einem Home-Assistant-Gerät zusammengefasst.",
+        "data": {
+          "sensor_name": "Gerätename",
+          "radio_id": "LaCrosse-Funk-ID",
+          "expire_after": "Nicht verfügbar nach"
+        },
+        "data_description": {
+          "radio_id": "Die vom Jeelink empfangene ID dieses Sensors.",
+          "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt."
+        }
+      },
+      "remove_sensor": {
+        "title": "LaCrosse-Sensor entfernen",
+        "data": {
+          "sensor_key": "Sensor"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Bitte einen gültigen Gerätenamen eingeben.",
+      "name_exists": "Ein Sensor mit diesem Namen existiert bereits.",
+      "radio_id_exists": "Diese Funk-ID ist bereits konfiguriert."
+    },
+    "abort": {
+      "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "humidity": {
+        "name": "Luftfeuchtigkeit"
+      }
+    },
+    "binary_sensor": {
+      "battery_low": {
+        "name": "Batterie schwach"
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "LaCrosse Jeelink",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Jeelink",
+        "description": "Configure the serial connection to your Jeelink. After setup, open Configure on the integration to add LaCrosse sensors.",
+        "data": {
+          "device": "Serial device",
+          "baud": "Baud rate"
+        },
+        "data_description": {
+          "device": "Usually /dev/ttyUSB0. Prefer a stable /dev/serial/by-id/... path when available.",
+          "baud": "Most Jeelink setups use 57600 baud."
+        }
+      },
+      "reconfigure": {
+        "title": "Change serial connection",
+        "data": {
+          "device": "Serial device",
+          "baud": "Baud rate"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This serial device is already configured.",
+      "unique_id_mismatch": "The selected device does not match this configuration entry.",
+      "reconfigure_successful": "The serial connection was updated successfully."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage LaCrosse sensors",
+        "menu_options": {
+          "add_sensor": "Add sensor",
+          "remove_sensor": "Remove sensor"
+        }
+      },
+      "add_sensor": {
+        "title": "Add LaCrosse sensor",
+        "description": "Add one physical LaCrosse sensor. Temperature, humidity and battery-low entities will be grouped under one Home Assistant device.",
+        "data": {
+          "sensor_name": "Device name",
+          "radio_id": "LaCrosse radio ID",
+          "expire_after": "Unavailable after"
+        },
+        "data_description": {
+          "radio_id": "The ID received by Jeelink for this sensor.",
+          "expire_after": "Seconds without a packet before the device is marked unavailable."
+        }
+      },
+      "remove_sensor": {
+        "title": "Remove LaCrosse sensor",
+        "data": {
+          "sensor_key": "Sensor"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Enter a valid device name.",
+      "name_exists": "A sensor with this name already exists.",
+      "radio_id_exists": "This radio ID is already configured."
+    },
+    "abort": {
+      "no_sensors": "No LaCrosse sensors are configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "Temperature"
+      },
+      "humidity": {
+        "name": "Humidity"
+      }
+    },
+    "binary_sensor": {
+      "battery_low": {
+        "name": "Battery low"
+      }
+    }
+  }
+}
