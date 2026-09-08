@@ -1,19 +1,19 @@
 {
   "domain": "lacrosse_jeelink",
   "name": "LaCrosse Jeelink",
-  "version": "0.1.0",
+  "codeowners": [
+    "@xsasx"
+  ],
   "config_flow": true,
+  "documentation": "https://github.com/xsasx/home-assistant-lacrosse-jeelink",
   "integration_type": "hub",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/xsasx/home-assistant-lacrosse-jeelink/issues",
   "loggers": [
     "pylacrosse"
   ],
   "requirements": [
     "pylacrosse==0.4"
   ],
-  "documentation": "https://github.com/xsasx/home-assistant-lacrosse-jeelink",
-  "issue_tracker": "https://github.com/xsasx/home-assistant-lacrosse-jeelink/issues",
-  "codeowners": [
-    "@xsasx"
-  ]
+  "version": "0.1.0"
 }
