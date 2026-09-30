@@ -33,13 +33,14 @@
       "init": {
         "title": "Manage LaCrosse sensors",
         "menu_options": {
-          "add_sensor": "Add sensor",
+          "add_sensor": "Add sensor manually",
+          "scan_sensor": "Search for sensors",
           "remove_sensor": "Remove sensor"
         }
       },
       "add_sensor": {
-        "title": "Add LaCrosse sensor",
-        "description": "Add one physical LaCrosse sensor. Temperature, humidity and battery-low entities will be grouped under one Home Assistant device.",
+        "title": "Add LaCrosse sensor manually",
+        "description": "Add a physical LaCrosse sensor using its radio ID.",
         "data": {
           "sensor_name": "Device name",
           "radio_id": "LaCrosse radio ID",
@@ -47,6 +48,24 @@
         },
         "data_description": {
           "radio_id": "The ID received by Jeelink for this sensor.",
+          "expire_after": "Seconds without a packet before the device is marked unavailable."
+        }
+      },
+      "scan_sensor": {
+        "title": "Search for LaCrosse sensors",
+        "description": "All LaCrosse sensors received by the Jeelink since the integration was started are shown here. Select a new sensor.",
+        "data": {
+          "discovered_sensor": "Discovered sensor"
+        }
+      },
+      "add_discovered_sensor": {
+        "title": "Add discovered sensor",
+        "description": "Radio ID {radio_id} was discovered. Current values: {temperature} °C / {humidity} %. Enter a name for the device.",
+        "data": {
+          "sensor_name": "Device name",
+          "expire_after": "Unavailable after"
+        },
+        "data_description": {
           "expire_after": "Seconds without a packet before the device is marked unavailable."
         }
       },
@@ -63,7 +82,9 @@
       "radio_id_exists": "This radio ID is already configured."
     },
     "abort": {
-      "no_sensors": "No LaCrosse sensors are configured."
+      "no_sensors": "No LaCrosse sensors are configured.",
+      "no_discovered_sensors": "No LaCrosse sensors have been received yet. Wait a moment or remove and reinsert the batteries in the sensor you want to discover.",
+      "sensor_already_configured": "This LaCrosse sensor is already configured."
     }
   },
   "entity": {
