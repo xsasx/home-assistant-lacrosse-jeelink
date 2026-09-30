@@ -10,6 +10,11 @@ from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlowWithReload
 from homeassistant.const import CONF_DEVICE
 from homeassistant.core import callback
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+)
 from homeassistant.util import slugify
 
 from .const import (
@@ -219,9 +224,13 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
         schema = vol.Schema(
             {
                 vol.Required(CONF_SENSOR_NAME): str,
-                vol.Required(CONF_RADIO_ID): vol.All(
-                    vol.Coerce(int),
-                    vol.Range(min=1, max=255),
+                vol.Required(CONF_RADIO_ID): NumberSelector(
+                    NumberSelectorConfig(
+                        min=0,
+                        max=255,
+                        step=1,
+                        mode=NumberSelectorMode.BOX,
+                    )
                 ),
                 vol.Required(
                     CONF_EXPIRE_AFTER,
