@@ -33,13 +33,14 @@
       "init": {
         "title": "LaCrosse-Sensoren verwalten",
         "menu_options": {
-          "add_sensor": "Sensor hinzufügen",
+          "add_sensor": "Sensor manuell hinzufügen",
+          "scan_sensor": "Nach Sensoren suchen",
           "remove_sensor": "Sensor entfernen"
         }
       },
       "add_sensor": {
-        "title": "LaCrosse-Sensor hinzufügen",
-        "description": "Füge einen physischen LaCrosse-Sensor hinzu. Temperatur, Luftfeuchtigkeit und Batteriewarnung werden unter einem Home-Assistant-Gerät zusammengefasst.",
+        "title": "LaCrosse-Sensor manuell hinzufügen",
+        "description": "Füge einen physischen LaCrosse-Sensor über seine Funk-ID hinzu.",
         "data": {
           "sensor_name": "Gerätename",
           "radio_id": "LaCrosse-Funk-ID",
@@ -47,6 +48,24 @@
         },
         "data_description": {
           "radio_id": "Die vom Jeelink empfangene ID dieses Sensors.",
+          "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt."
+        }
+      },
+      "scan_sensor": {
+        "title": "LaCrosse-Sensor suchen",
+        "description": "Hier werden alle LaCrosse-Sensoren angezeigt, die der Jeelink seit dem Start der Integration empfangen hat. Wähle einen neuen Sensor aus.",
+        "data": {
+          "discovered_sensor": "Gefundener Sensor"
+        }
+      },
+      "add_discovered_sensor": {
+        "title": "Gefundenen Sensor hinzufügen",
+        "description": "Funk-ID {radio_id} wurde gefunden. Aktuelle Werte: {temperature} °C / {humidity} %. Vergib jetzt einen Namen für das Gerät.",
+        "data": {
+          "sensor_name": "Gerätename",
+          "expire_after": "Nicht verfügbar nach"
+        },
+        "data_description": {
           "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt."
         }
       },
@@ -63,7 +82,9 @@
       "radio_id_exists": "Diese Funk-ID ist bereits konfiguriert."
     },
     "abort": {
-      "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert."
+      "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert.",
+      "no_discovered_sensors": "Es wurden noch keine LaCrosse-Sensoren empfangen. Warte kurz oder nimm beim gewünschten Sensor die Batterien kurz heraus und setze sie wieder ein.",
+      "sensor_already_configured": "Dieser LaCrosse-Sensor ist bereits konfiguriert."
     }
   },
   "entity": {
