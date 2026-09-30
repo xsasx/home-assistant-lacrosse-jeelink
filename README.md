@@ -1,3 +1,14 @@
+---
+
+## ☕ Support the project
+
+If this integration is useful to you and you'd like to support its development, you can buy me a coffee.
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20the%20project-yellow?logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/Xdog9YD)
+
+Thank you for your support! ❤️
+
+
 # LaCrosse Jeelink for Home Assistant
 
 A modern Home Assistant custom integration for LaCrosse / Technoline wireless temperature and humidity sensors received through a Jeelink USB radio gateway.
