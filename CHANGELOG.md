@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.2.0-beta.2
+
+### Changed
+
+- Replaced the radio ID slider with a numeric input field for easier manual sensor configuration
+- Radio ID `0` is now supported
+- Changed the `pylacrosse` requirement from an exact version pin to a minimum version requirement to comply with Home Assistant validation
+
+### Fixed
+
+- Removing a configured sensor now also removes its Home Assistant device and associated entities
+- Prevents orphaned device and entity registry entries after deleting a sensor
+
+### Testing
+
+Sensor discovery has now been successfully tested by a community user with a previously unconfigured **Technoline TX29DTH-IT**.
+
+The complete discovery workflow was confirmed to work:
+
+`discover → NEW → select → name → add device`
+
+This remains a beta release. Additional testing of sensor discovery, manual sensor configuration and sensor removal is welcome.
+
 ## v0.2.0-beta.1
 
 ### Added
