@@ -10,6 +10,7 @@ from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlowWithReload
 from homeassistant.const import CONF_DEVICE
 from homeassistant.core import callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
@@ -450,10 +451,33 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             )
 
         if user_input is not None:
-            sensors.pop(
-                user_input[CONF_SENSOR_KEY],
-                None,
+            sensor_key = user_input[CONF_SENSOR_KEY]
+
+            # Remove the sensor from the integration configuration.
+            sensors.pop(sensor_key, None)
+
+            # Remove the corresponding Home Assistant device.
+            #
+            # All entities belonging to a physical LaCrosse sensor use:
+            #
+            #   (DOMAIN, "<entry_id>:<sensor_key>")
+            #
+            # as their device identifier. This lets us remove exactly
+            # this sensor without touching the Jeelink hub or any other
+            # configured LaCrosse sensors.
+            device_registry = dr.async_get(self.hass)
+
+            device = device_registry.async_get_device(
+                identifiers={
+                    (
+                        DOMAIN,
+                        f"{self.config_entry.entry_id}:{sensor_key}",
+                    )
+                }
             )
+
+            if device is not None:
+                device_registry.async_remove_device(device.id)
 
             return self.async_create_entry(
                 data={
