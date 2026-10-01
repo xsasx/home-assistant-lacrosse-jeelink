@@ -1,4 +1,4 @@
-"""Config flow for LaCrosse Jeelink."""
+"""Config flow for LaCrosse Jeelink"""
 
 from __future__ import annotations
 
