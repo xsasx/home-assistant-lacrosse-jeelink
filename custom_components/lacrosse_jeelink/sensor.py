@@ -12,7 +12,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import LaCrosseConfigEntry
-from .const import CONF_EXPIRE_AFTER, CONF_RADIO_ID, CONF_SENSORS, DEFAULT_EXPIRE_AFTER
+from .const import (
+    CONF_EXPIRE_AFTER,
+    CONF_HAS_HUMIDITY,
+    CONF_RADIO_ID,
+    CONF_SENSORS,
+    DEFAULT_EXPIRE_AFTER,
+)
 from .device import LaCrosseDeviceData
 from .entity import LaCrosseEntity
 
@@ -27,30 +33,53 @@ async def async_setup_entry(
     sensors_config = entry.options.get(CONF_SENSORS, {})
     entities: list[SensorEntity] = []
 
-    device_data = hass.data.setdefault("lacrosse_jeelink_device_data", {}).setdefault(
-        entry.entry_id, {}
+    device_data = hass.data.setdefault(
+        "lacrosse_jeelink_device_data",
+        {},
+    ).setdefault(
+        entry.entry_id,
+        {},
     )
 
     for sensor_key, sensor_config in sensors_config.items():
         data = device_data.get(sensor_key)
+
         if data is None:
             data = LaCrosseDeviceData(
                 hass=hass,
                 lacrosse=entry.runtime_data.lacrosse,
                 radio_id=int(sensor_config[CONF_RADIO_ID]),
                 expire_after=int(
-                    sensor_config.get(CONF_EXPIRE_AFTER, DEFAULT_EXPIRE_AFTER)
+                    sensor_config.get(
+                        CONF_EXPIRE_AFTER,
+                        DEFAULT_EXPIRE_AFTER,
+                    )
                 ),
             )
             device_data[sensor_key] = data
 
         name = sensor_config["name"]
-        entities.extend(
-            [
-                LaCrosseTemperature(data, entry.entry_id, sensor_key, name),
-                LaCrosseHumidity(data, entry.entry_id, sensor_key, name),
-            ]
+
+        entities.append(
+            LaCrosseTemperature(
+                data,
+                entry.entry_id,
+                sensor_key,
+                name,
+            )
         )
+
+        # Existing configurations created before has_humidity was
+        # introduced default to True for backwards compatibility.
+        if sensor_config.get(CONF_HAS_HUMIDITY, True):
+            entities.append(
+                LaCrosseHumidity(
+                    data,
+                    entry.entry_id,
+                    sensor_key,
+                    name,
+                )
+            )
 
     async_add_entities(entities)
 
@@ -63,8 +92,20 @@ class LaCrosseTemperature(LaCrosseEntity, SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
-    def __init__(self, data, entry_id: str, sensor_key: str, device_name: str) -> None:
-        super().__init__(data, entry_id, sensor_key, device_name, "temperature")
+    def __init__(
+        self,
+        data,
+        entry_id: str,
+        sensor_key: str,
+        device_name: str,
+    ) -> None:
+        super().__init__(
+            data,
+            entry_id,
+            sensor_key,
+            device_name,
+            "temperature",
+        )
 
     @property
     def native_value(self) -> float | None:
@@ -80,8 +121,20 @@ class LaCrosseHumidity(LaCrosseEntity, SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = PERCENTAGE
 
-    def __init__(self, data, entry_id: str, sensor_key: str, device_name: str) -> None:
-        super().__init__(data, entry_id, sensor_key, device_name, "humidity")
+    def __init__(
+        self,
+        data,
+        entry_id: str,
+        sensor_key: str,
+        device_name: str,
+    ) -> None:
+        super().__init__(
+            data,
+            entry_id,
+            sensor_key,
+            device_name,
+            "humidity",
+        )
 
     @property
     def native_value(self) -> int | None:
