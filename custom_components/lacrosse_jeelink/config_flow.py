@@ -1,4 +1,4 @@
-"""Config flow for LaCrosse Jeelink"""
+"""Config flow for LaCrosse Jeelink."""
 
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from homeassistant.util import slugify
 from .const import (
     CONF_BAUD,
     CONF_EXPIRE_AFTER,
+    CONF_HAS_HUMIDITY,
     CONF_RADIO_ID,
     CONF_SENSOR_KEY,
     CONF_SENSOR_NAME,
@@ -30,6 +31,11 @@ from .const import (
     DEFAULT_EXPIRE_AFTER,
     DOMAIN,
 )
+
+
+def _has_valid_humidity(humidity: int | None) -> bool:
+    """Return whether a received humidity value is valid."""
+    return humidity is not None and 0 <= humidity <= 100
 
 
 class LaCrosseJeelinkConfigFlow(
@@ -209,10 +215,29 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                 errors[CONF_RADIO_ID] = "radio_id_exists"
 
             else:
+                discovered = (
+                    self.config_entry.runtime_data.discovered_sensors.get(
+                        radio_id
+                    )
+                )
+
+                # If the sensor has already been seen by discovery,
+                # use the received humidity value to determine whether
+                # it supports humidity. If it has not been seen yet,
+                # default to True for backwards compatibility.
+                has_humidity = (
+                    _has_valid_humidity(
+                        discovered.get("humidity")
+                    )
+                    if discovered is not None
+                    else True
+                )
+
                 sensors[sensor_key] = {
                     "name": name,
                     CONF_RADIO_ID: radio_id,
                     CONF_EXPIRE_AFTER: expire_after,
+                    CONF_HAS_HUMIDITY: has_humidity,
                 }
 
                 return self.async_create_entry(
@@ -283,6 +308,16 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
 
             battery_text = "LOW" if low_battery else "OK"
 
+            if _has_valid_humidity(humidity):
+                measurement_text = (
+                    f"{temperature:.1f} °C / "
+                    f"{humidity} %"
+                )
+            else:
+                measurement_text = (
+                    f"{temperature:.1f} °C"
+                )
+
             if radio_id in configured_ids:
                 configured_name = next(
                     (
@@ -295,16 +330,14 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
 
                 label = (
                     f"ID {radio_id} — "
-                    f"{temperature:.1f} °C / "
-                    f"{humidity} % — "
+                    f"{measurement_text} — "
                     f"Battery {battery_text} — "
                     f"{configured_name}"
                 )
             else:
                 label = (
                     f"ID {radio_id} — "
-                    f"{temperature:.1f} °C / "
-                    f"{humidity} % — "
+                    f"{measurement_text} — "
                     f"Battery {battery_text} — NEW"
                 )
 
@@ -356,6 +389,16 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
 
         radio_id = self._discovered_radio_id
 
+        discovered = (
+            self.config_entry.runtime_data.discovered_sensors.get(
+                radio_id,
+                {},
+            )
+        )
+
+        humidity = discovered.get("humidity")
+        has_humidity = _has_valid_humidity(humidity)
+
         if user_input is not None:
             name = user_input[CONF_SENSOR_NAME].strip()
             expire_after = int(user_input[CONF_EXPIRE_AFTER])
@@ -379,6 +422,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     "name": name,
                     CONF_RADIO_ID: radio_id,
                     CONF_EXPIRE_AFTER: expire_after,
+                    CONF_HAS_HUMIDITY: has_humidity,
                 }
 
                 return self.async_create_entry(
@@ -388,15 +432,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     }
                 )
 
-        discovered = (
-            self.config_entry.runtime_data.discovered_sensors.get(
-                radio_id,
-                {},
-            )
-        )
-
         temperature = discovered.get("temperature")
-        humidity = discovered.get("humidity")
 
         description_placeholders = {
             "radio_id": str(radio_id),
@@ -407,8 +443,8 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             ),
             "humidity": (
                 str(humidity)
-                if humidity is not None
-                else "?"
+                if has_humidity
+                else "not supported"
             ),
         }
 
