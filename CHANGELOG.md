@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.2.0-beta.3
+
+### Added
+
+- Added automatic detection of temperature-only LaCrosse / Technoline sensors
+- Added persistent `has_humidity` capability information for configured sensors
+
+### Changed
+
+- Sensor discovery now only displays humidity when the received humidity value is valid
+- Temperature-only sensors no longer create a humidity entity
+- Existing sensors configured with earlier versions are automatically migrated when they are detected as temperature-only
+
+### Fixed
+
+- Fixed temperature-only sensors such as the Technoline TX29D-IT and TX29-IT incorrectly exposing a humidity value of `106 %`
+- Existing invalid humidity entities are automatically removed during migration
+- Temperature and battery entities remain unchanged when a sensor is migrated to temperature-only
+
+### Testing
+
+The temperature-only sensor migration was tested with an existing configured sensor which previously exposed `106 %` humidity.
+
+The migration was confirmed to:
+
+- automatically detect the temperature-only sensor
+- remove the invalid humidity entity
+- preserve the temperature entity
+- preserve the battery entity
+- persist the detected capability across integration reloads and Home Assistant restarts
+
+Humidity-capable sensors were also verified to continue exposing their humidity entities normally.
+
+Community testing of temperature-only models such as the **Technoline TX29D-IT** and **Technoline TX29-IT** is especially welcome before the final `v0.2.0` release.
+
 ## v0.2.0-beta.2
 
 ### Changed
@@ -27,35 +62,21 @@ This remains a beta release. Additional testing of sensor discovery, manual sens
 
 ### Added
 
-- Added LaCrosse sensor discovery / radio ID scanner
-- All sensors received by the Jeelink can now be displayed directly in the Home Assistant UI
-- Displays radio ID, temperature, humidity and battery status
-- Already configured radio IDs are recognized automatically
-- New/unconfigured sensors are marked as `NEW`
+- Added sensor discovery through the existing Jeelink connection
+- Added a discovery scanner to the integration options
+- Discovered sensors show radio ID, temperature, humidity and battery status
+- Unknown discovered sensors are marked as `NEW`
+- Already configured sensors are identified by their configured name
 - Discovered sensors can be selected and added directly from the UI
-- External `pylacrosse scan` is no longer required to determine a sensor ID
+- Added runtime discovery cache for received LaCrosse sensor packets
 
-### Fixed
+### Changed
 
-- Fixed sensor name handling when removing configured sensors
+- Sensor configuration can now be managed through the Home Assistant UI
+- Existing configured radio IDs are detected during discovery
 
-### Testing
+### Notes
 
-This is a beta release.
+The discovery cache is runtime-only and is cleared when the integration or Home Assistant is restarted.
 
-Discovery of already configured sensors has been successfully tested with multiple sensors.
-
-Testing with additional unconfigured LaCrosse / Technoline sensors is especially welcome. In particular, feedback on the complete discovery workflow is appreciated:
-
-`discover → NEW → select → name → add device`
-
-## 0.1.0 - 2026-09-08
-
-- Initial public development release.
-- Home Assistant config flow for Jeelink serial device and baud rate.
-- Options flow for adding and removing LaCrosse radio sensors.
-- Device Registry grouping per physical sensor.
-- Temperature, humidity and battery-low entities.
-- Availability timeout.
-- German and English translations.
-- HACS and hassfest validation workflows.
+This is a beta release intended for testing the new discovery workflow.
