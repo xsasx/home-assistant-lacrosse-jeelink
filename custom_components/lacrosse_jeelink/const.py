@@ -8,6 +8,7 @@ CONF_SENSOR_KEY = "sensor_key"
 CONF_SENSOR_NAME = "sensor_name"
 CONF_RADIO_ID = "radio_id"
 CONF_EXPIRE_AFTER = "expire_after"
+CONF_HAS_HUMIDITY = "has_humidity"
 
 DEFAULT_BAUD = 57600
 DEFAULT_EXPIRE_AFTER = 300
