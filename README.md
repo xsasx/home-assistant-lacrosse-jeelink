@@ -1,3 +1,6 @@
+
+
+
 ---
 
 ## ☕ Support the project
@@ -7,6 +10,29 @@ If this integration is useful to you and you'd like to support its development, 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20the%20project-yellow?logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/Xdog9YD)
 
 Thank you for your support! ❤️
+
+
+
+## ✅ Tested devices
+
+The following LaCrosse / Technoline sensors have been successfully tested with this integration:
+
+| Model | Temperature | Humidity | Status |
+|---|:---:|:---:|---|
+| Technoline TX29DTH-IT | ✅ | ✅ | Tested |
+| Technoline TX35DTH-IT | ✅ | ✅ | Tested |
+| Technoline TX29D-IT | ✅ | ❌ | Tested |
+| Technoline TX29-IT | ✅ | ❌ | Tested |
+
+### Temperature-only sensors
+
+The **TX29D-IT** and **TX29-IT** are temperature-only sensors and do not provide humidity measurements.
+
+At the moment, these sensors may report an invalid humidity value of `106 %`. This is a known issue and will be handled by the integration in a future update.
+
+Other compatible LaCrosse / Technoline sensors may also work even if they are not listed here.
+
+If you successfully test another model, please let me know through GitHub Issues.
 
 
 # LaCrosse Jeelink for Home Assistant
