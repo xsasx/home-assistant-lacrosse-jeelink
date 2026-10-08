@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import voluptuous as vol
@@ -164,6 +165,10 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
     def __init__(self) -> None:
         """Initialize options flow."""
         self._discovered_radio_id: int | None = None
+        self._replacement_sensor_key: str | None = None
+        self._replacement_old_id: int | None = None
+        self._replacement_started_at: datetime | None = None
+        self._replacement_candidate_id: int | None = None
 
     async def async_step_init(
         self,
@@ -176,6 +181,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             menu_options=[
                 "add_sensor",
                 "scan_sensor",
+                "replace_battery",
                 "remove_sensor",
             ],
         )
@@ -466,6 +472,144 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             data_schema=schema,
             errors=errors,
             description_placeholders=description_placeholders,
+        )
+
+    async def async_step_replace_battery(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Select the configured sensor whose batteries will be replaced."""
+        sensors = self.config_entry.options.get(CONF_SENSORS, {})
+        if not sensors:
+            return self.async_abort(reason="no_sensors")
+
+        if user_input is not None:
+            sensor_key = user_input[CONF_SENSOR_KEY]
+            sensor = sensors.get(sensor_key)
+            if sensor is None:
+                return self.async_show_form(
+                    step_id="replace_battery",
+                    data_schema=vol.Schema(
+                        {vol.Required(CONF_SENSOR_KEY): vol.In(
+                            {key: value["name"] for key, value in sensors.items()}
+                        )}
+                    ),
+                    errors={"base": "sensor_not_found"},
+                )
+            self._replacement_sensor_key = sensor_key
+            self._replacement_old_id = int(sensor[CONF_RADIO_ID])
+            self._replacement_candidate_id = None
+            # Start only after selection; previously cached packets are excluded.
+            self._replacement_started_at = datetime.now(timezone.utc)
+            return await self.async_step_replace_battery_scan()
+
+        return self.async_show_form(
+            step_id="replace_battery",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_SENSOR_KEY): vol.In(
+                    {key: value["name"] for key, value in sensors.items()}
+                )}
+            ),
+        )
+
+    async def async_step_replace_battery_scan(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Find fresh, unconfigured new-battery packets in a 60-second window."""
+        sensor_key = self._replacement_sensor_key
+        started = self._replacement_started_at
+        old_id = self._replacement_old_id
+        sensors = self.config_entry.options.get(CONF_SENSORS, {})
+        if sensor_key is None or started is None or old_id is None:
+            return self.async_abort(reason="no_sensors")
+        sensor = sensors.get(sensor_key)
+        if sensor is None:
+            return self.async_abort(reason="no_sensors")
+        if int(sensor[CONF_RADIO_ID]) != old_id:
+            return self.async_abort(reason="sensor_already_configured")
+
+        now = datetime.now(timezone.utc)
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            if now > started + timedelta(seconds=60):
+                # A new window requires a deliberate user action and battery
+                # reinsertion, rather than silently accepting stale packets.
+                self._replacement_started_at = now
+                self._replacement_candidate_id = None
+                errors["base"] = "no_new_radio_id"
+            else:
+                configured_ids = {
+                    int(item[CONF_RADIO_ID]) for item in sensors.values()
+                }
+                candidates = [
+                    radio_id
+                    for radio_id, packet in
+                    self.config_entry.runtime_data.discovered_sensors.items()
+                    if radio_id not in configured_ids
+                    and packet.get("new_battery") is True
+                    and isinstance(packet.get("last_seen"), datetime)
+                    and started < packet["last_seen"] <= now
+                ]
+                if len(candidates) == 1:
+                    self._replacement_candidate_id = candidates[0]
+                    return await self.async_step_replace_battery_confirm()
+                errors["base"] = (
+                    "multiple_radio_ids" if len(candidates) > 1
+                    else "no_new_radio_id"
+                )
+
+        return self.async_show_form(
+            step_id="replace_battery_scan",
+            data_schema=vol.Schema({vol.Required("continue_scan", default=True): bool}),
+            errors=errors,
+            description_placeholders={
+                "sensor_name": sensor["name"],
+                "radio_id": str(old_id),
+            },
+        )
+
+    async def async_step_replace_battery_confirm(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Apply a confirmed ID change while retaining the stable sensor key."""
+        sensor_key = self._replacement_sensor_key
+        old_id = self._replacement_old_id
+        new_id = self._replacement_candidate_id
+        if sensor_key is None or old_id is None or new_id is None:
+            return self.async_abort(reason="no_sensors")
+
+        sensors = dict(self.config_entry.options.get(CONF_SENSORS, {}))
+        sensor = sensors.get(sensor_key)
+        if sensor is None:
+            return self.async_abort(reason="no_sensors")
+        errors: dict[str, str] = {}
+        if int(sensor[CONF_RADIO_ID]) != old_id:
+            errors["base"] = "radio_id_changed"
+        elif any(
+            int(item[CONF_RADIO_ID]) == new_id
+            for key, item in sensors.items() if key != sensor_key
+        ):
+            errors["base"] = "radio_id_exists"
+        elif user_input is not None and user_input.get("confirm") is True:
+            updated = dict(sensor)
+            updated[CONF_RADIO_ID] = new_id
+            # Do not change has_humidity, names, device identifiers or keys.
+            sensors[sensor_key] = updated
+            return self.async_create_entry(
+                data={**self.config_entry.options, CONF_SENSORS: sensors}
+            )
+
+        return self.async_show_form(
+            step_id="replace_battery_confirm",
+            data_schema=vol.Schema({vol.Required("confirm", default=False): bool}),
+            errors=errors,
+            description_placeholders={
+                "sensor_name": sensor["name"],
+                "old_radio_id": str(old_id),
+                "new_radio_id": str(new_id),
+            },
         )
 
     async def async_step_remove_sensor(
