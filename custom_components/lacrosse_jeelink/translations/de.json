@@ -1,3 +1,4 @@
+
 {
   "title": "LaCrosse Jeelink",
   "config": {
@@ -35,6 +36,7 @@
         "menu_options": {
           "add_sensor": "Sensor manuell hinzufügen",
           "scan_sensor": "Nach Sensoren suchen",
+          "replace_battery": "Batteriewechsel / Funk-ID neu zuordnen",
           "remove_sensor": "Sensor entfernen"
         }
       },
@@ -69,6 +71,27 @@
           "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt."
         }
       },
+      "replace_battery": {
+        "title": "Batteriewechsel / Funk-ID neu zuordnen",
+        "description": "Wähle einen bereits eingerichteten Sensor aus. Die Integration sucht anschließend nach einer neuen Funk-ID. Das bestehende Home-Assistant-Gerät und seine Entitäten bleiben erhalten.",
+        "data": {
+          "sensor_key": "Vorhandener Sensor"
+        }
+      },
+      "replace_battery_scan": {
+        "title": "Neue Funk-ID erkennen",
+        "description": "Ausgewählter Sensor: {sensor_name} (bisherige Funk-ID: {radio_id}). Entferne die Batterien und setze sie wieder ein. Die Integration sucht nach neuen Funkpaketen mit gesetztem Batteriewechsel-Kennzeichen. Berücksichtigt werden nur Pakete, die nach dem Start der Suche empfangen wurden.",
+        "data": {
+          "continue_scan": "Erneut suchen"
+        }
+      },
+      "replace_battery_confirm": {
+        "title": "Neue Funk-ID bestätigen",
+        "description": "Für {sensor_name} wurde eine mögliche neue Funk-ID erkannt. Bisherige ID: {old_radio_id}. Neue ID: {new_radio_id}. Bestätige die Zuordnung nur, wenn du sicher bist, dass es sich um den richtigen physischen Sensor handelt.",
+        "data": {
+          "confirm": "Neue Funk-ID übernehmen"
+        }
+      },
       "remove_sensor": {
         "title": "LaCrosse-Sensor entfernen",
         "data": {
@@ -79,7 +102,11 @@
     "error": {
       "invalid_name": "Bitte einen gültigen Gerätenamen eingeben.",
       "name_exists": "Ein Sensor mit diesem Namen existiert bereits.",
-      "radio_id_exists": "Diese Funk-ID ist bereits konfiguriert."
+      "radio_id_exists": "Diese Funk-ID ist bereits konfiguriert.",
+      "no_new_radio_id": "Es wurde noch keine passende neue Funk-ID erkannt. Setze die Batterien erneut ein und versuche es noch einmal.",
+      "multiple_radio_ids": "Es wurden mehrere mögliche Funk-IDs erkannt. Eine automatische Zuordnung ist nicht möglich.",
+      "sensor_not_found": "Der ausgewählte Sensor existiert nicht mehr.",
+      "radio_id_changed": "Die Sensorkonfiguration wurde zwischenzeitlich geändert. Starte die Zuordnung erneut."
     },
     "abort": {
       "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert.",
