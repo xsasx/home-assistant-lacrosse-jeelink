@@ -1,3 +1,4 @@
+
 {
   "title": "LaCrosse Jeelink",
   "config": {
@@ -35,6 +36,7 @@
         "menu_options": {
           "add_sensor": "Add sensor manually",
           "scan_sensor": "Search for sensors",
+          "replace_battery": "Battery replacement / Reassign radio ID",
           "remove_sensor": "Remove sensor"
         }
       },
@@ -69,6 +71,27 @@
           "expire_after": "Seconds without a packet before the device is marked unavailable."
         }
       },
+      "replace_battery": {
+        "title": "Battery replacement / Reassign radio ID",
+        "description": "Select an existing sensor. The integration will search for a new radio ID while keeping the existing Home Assistant device and entities.",
+        "data": {
+          "sensor_key": "Existing sensor"
+        }
+      },
+      "replace_battery_scan": {
+        "title": "Detect new radio ID",
+        "description": "Selected sensor: {sensor_name} (current radio ID: {radio_id}). Remove and reinsert its batteries. The integration will look for newly received radio packets with the new-battery flag. Only packets received after starting the search will be considered.",
+        "data": {
+          "continue_scan": "Search again"
+        }
+      },
+      "replace_battery_confirm": {
+        "title": "Confirm new radio ID",
+        "description": "A possible new radio ID was detected for {sensor_name}. Current ID: {old_radio_id}. New ID: {new_radio_id}. Confirm only if you are certain this is the correct physical sensor.",
+        "data": {
+          "confirm": "Confirm reassignment"
+        }
+      },
       "remove_sensor": {
         "title": "Remove LaCrosse sensor",
         "data": {
@@ -79,7 +102,11 @@
     "error": {
       "invalid_name": "Enter a valid device name.",
       "name_exists": "A sensor with this name already exists.",
-      "radio_id_exists": "This radio ID is already configured."
+      "radio_id_exists": "This radio ID is already configured.",
+      "no_new_radio_id": "No suitable new radio ID has been detected yet. Replace the batteries and try again.",
+      "multiple_radio_ids": "Multiple possible radio IDs were detected. The sensor cannot be assigned automatically.",
+      "sensor_not_found": "The selected sensor no longer exists.",
+      "radio_id_changed": "The sensor configuration has changed. Restart the reassignment."
     },
     "abort": {
       "no_sensors": "No LaCrosse sensors are configured.",
