@@ -547,9 +547,8 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     for radio_id, packet in
                     self.config_entry.runtime_data.discovered_sensors.items()
                     if radio_id not in configured_ids
-                    and packet.get("new_battery") is True
-                    and isinstance(packet.get("last_seen"), datetime)
-                    and started < packet["last_seen"] <= now
+                    and isinstance(packet.get("last_new_battery_seen"), datetime)
+                    and started < packet["last_new_battery_seen"] <= now
                 ]
                 if len(candidates) == 1:
                     self._replacement_candidate_id = candidates[0]
