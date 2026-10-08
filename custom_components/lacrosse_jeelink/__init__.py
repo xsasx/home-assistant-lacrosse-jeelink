@@ -1,6 +1,3 @@
-bash
--lc
-mkdir -p /mnt/data/lacrosse_v030; cat > /mnt/data/lacrosse_v030/__init__.py <<'PY'
 """LaCrosse Jeelink integration."""
 
 from __future__ import annotations
@@ -224,5 +221,3 @@ async def async_unload_entry(
             _LOGGER.exception("Error while closing LaCrosse Jeelink")
 
     return unload_ok
-PY
-python -m py_compile /mnt/data/lacrosse_v030/__init__.py && echo 'Syntaxprüfung erfolgreich'; wc -l /mnt/data/lacrosse_v030/__init__.py
