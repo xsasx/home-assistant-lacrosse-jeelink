@@ -1,3 +1,4 @@
+
 """Base entity for LaCrosse Jeelink."""
 
 from __future__ import annotations
@@ -50,4 +51,10 @@ class LaCrosseEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         """Register state update callback."""
+        await super().async_added_to_hass()
         self.data.add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Remove state update callback."""
+        self.data.remove_listener(self.async_write_ha_state)
+        await super().async_will_remove_from_hass()
