@@ -171,6 +171,8 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
     def __init__(self) -> None:
         """Initialize options flow."""
         self._discovered_radio_id: int | None = None
+        self._edit_sensor_key: str | None = None
+        self._edit_radio_id: int | None = None
         self._replacement_sensor_key: str | None = None
         self._replacement_old_id: int | None = None
         self._replacement_started_at: datetime | None = None
@@ -187,6 +189,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             menu_options=[
                 "add_sensor",
                 "scan_sensor",
+                "edit_sensor",
                 "replace_battery",
                 "remove_sensor",
                 "raw_telegram_diagnostics",
@@ -528,6 +531,102 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             data_schema=schema,
             errors=errors,
             description_placeholders=description_placeholders,
+        )
+
+    async def async_step_edit_sensor(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Select an existing sensor to edit without changing its identity."""
+        sensors = self.config_entry.options.get(CONF_SENSORS, {})
+        if not sensors:
+            return self.async_abort(reason="no_sensors")
+
+        choices = {
+            key: f"{value['name']} (ID {value[CONF_RADIO_ID]})"
+            for key, value in sensors.items()
+        }
+
+        if user_input is not None:
+            sensor_key = user_input[CONF_SENSOR_KEY]
+            sensor = sensors.get(sensor_key)
+            if sensor is None:
+                return self.async_show_form(
+                    step_id="edit_sensor",
+                    data_schema=vol.Schema(
+                        {vol.Required(CONF_SENSOR_KEY): vol.In(choices)}
+                    ),
+                    errors={"base": "sensor_not_found"},
+                )
+
+            self._edit_sensor_key = sensor_key
+            self._edit_radio_id = int(sensor[CONF_RADIO_ID])
+            return await self.async_step_edit_sensor_settings()
+
+        return self.async_show_form(
+            step_id="edit_sensor",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_SENSOR_KEY): vol.In(choices)}
+            ),
+        )
+
+    async def async_step_edit_sensor_settings(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Update sensor capabilities and timeout, retaining its stable key."""
+        sensor_key = self._edit_sensor_key
+        if sensor_key is None:
+            return self.async_abort(reason="no_sensors")
+
+        sensors = dict(self.config_entry.options.get(CONF_SENSORS, {}))
+        sensor = sensors.get(sensor_key)
+        if sensor is None:
+            return self.async_abort(reason="no_sensors")
+
+        if int(sensor[CONF_RADIO_ID]) != self._edit_radio_id:
+            return self.async_abort(reason="sensor_already_configured")
+
+        if user_input is not None:
+            multi_channel = user_input[CONF_MULTI_CHANNEL] is True
+            has_humidity = (
+                False if multi_channel else user_input[CONF_HAS_HUMIDITY] is True
+            )
+            updated = dict(sensor)
+            updated[CONF_MULTI_CHANNEL] = multi_channel
+            updated[CONF_HAS_HUMIDITY] = has_humidity
+            updated[CONF_HUMIDITY_MODE] = HUMIDITY_MODE_MANUAL
+            updated[CONF_EXPIRE_AFTER] = int(user_input[CONF_EXPIRE_AFTER])
+            sensors[sensor_key] = updated
+
+            return self.async_create_entry(
+                data={**self.config_entry.options, CONF_SENSORS: sensors}
+            )
+
+        return self.async_show_form(
+            step_id="edit_sensor_settings",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_MULTI_CHANNEL,
+                        default=sensor.get(CONF_MULTI_CHANNEL, False) is True,
+                    ): bool,
+                    vol.Required(
+                        CONF_HAS_HUMIDITY,
+                        default=sensor.get(CONF_HAS_HUMIDITY, True) is True,
+                    ): bool,
+                    vol.Required(
+                        CONF_EXPIRE_AFTER,
+                        default=int(
+                            sensor.get(CONF_EXPIRE_AFTER, DEFAULT_EXPIRE_AFTER)
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                }
+            ),
+            description_placeholders={
+                "sensor_name": sensor["name"],
+                "radio_id": str(sensor[CONF_RADIO_ID]),
+            },
         )
 
     async def async_step_replace_battery(
