@@ -37,6 +37,7 @@ from .const import (
 CONF_HUMIDITY_MODE = "humidity_mode"
 HUMIDITY_MODE_MANUAL = "manual"
 CONF_RAW_TELEGRAM_DIAGNOSTICS = "raw_telegram_diagnostics"
+CONF_MULTI_CHANNEL = "multi_channel"
 
 
 def _has_valid_humidity(humidity: int | None) -> bool:
@@ -244,7 +245,10 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             name = user_input[CONF_SENSOR_NAME].strip()
             radio_id = int(user_input[CONF_RADIO_ID])
             expire_after = int(user_input[CONF_EXPIRE_AFTER])
-            has_humidity = bool(user_input[CONF_HAS_HUMIDITY])
+            multi_channel = bool(user_input.get(CONF_MULTI_CHANNEL, False))
+            has_humidity = (
+                False if multi_channel else bool(user_input[CONF_HAS_HUMIDITY])
+            )
 
             sensor_key = slugify(name)
 
@@ -272,6 +276,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     CONF_RADIO_ID: radio_id,
                     CONF_EXPIRE_AFTER: expire_after,
                     CONF_HAS_HUMIDITY: has_humidity,
+                    CONF_MULTI_CHANNEL: multi_channel,
                     CONF_HUMIDITY_MODE: HUMIDITY_MODE_MANUAL,
                 }
 
@@ -293,6 +298,10 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
+                vol.Required(
+                    CONF_MULTI_CHANNEL,
+                    default=False,
+                ): bool,
                 vol.Required(
                     CONF_HAS_HUMIDITY,
                     default=True,
@@ -441,7 +450,10 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
         if user_input is not None:
             name = user_input[CONF_SENSOR_NAME].strip()
             expire_after = int(user_input[CONF_EXPIRE_AFTER])
-            has_humidity = bool(user_input[CONF_HAS_HUMIDITY])
+            multi_channel = bool(user_input.get(CONF_MULTI_CHANNEL, False))
+            has_humidity = (
+                False if multi_channel else bool(user_input[CONF_HAS_HUMIDITY])
+            )
 
             sensor_key = slugify(name)
 
@@ -463,6 +475,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     CONF_RADIO_ID: radio_id,
                     CONF_EXPIRE_AFTER: expire_after,
                     CONF_HAS_HUMIDITY: has_humidity,
+                    CONF_MULTI_CHANNEL: multi_channel,
                     CONF_HUMIDITY_MODE: HUMIDITY_MODE_MANUAL,
                 }
 
@@ -492,6 +505,10 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
         schema = vol.Schema(
             {
                 vol.Required(CONF_SENSOR_NAME): str,
+                vol.Required(
+                    CONF_MULTI_CHANNEL,
+                    default=False,
+                ): bool,
                 vol.Required(
                     CONF_HAS_HUMIDITY,
                     default=suggested_humidity,
