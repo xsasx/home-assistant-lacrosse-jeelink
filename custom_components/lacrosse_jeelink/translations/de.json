@@ -36,6 +36,7 @@
         "menu_options": {
           "add_sensor": "Sensor manuell hinzufügen",
           "scan_sensor": "Nach Sensoren suchen",
+          "edit_sensor": "Vorhandenen Sensor bearbeiten",
           "replace_battery": "Batteriewechsel / Funk-ID neu zuordnen",
           "remove_sensor": "Sensor entfernen",
           "raw_telegram_diagnostics": "Rohtelegramm-Diagnose"
@@ -88,6 +89,27 @@
           "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt.",
           "has_humidity": "Die Vorauswahl basiert auf dem zuletzt empfangenen Funkpaket. Bitte prüfe sie anhand des Sensormodells. Die bestätigte Auswahl bleibt dauerhaft erhalten.",
           "multi_channel": "Aktivieren für Sensoren mit getrenntem internem und externem Temperaturfühler, beispielsweise den Technoline TX25TP-IT. Es werden zwei Temperaturentitäten angelegt und die Luftfeuchtigkeit wird deaktiviert."
+        }
+      },
+      "edit_sensor": {
+        "title": "Vorhandenen Sensor bearbeiten",
+        "description": "Wähle einen bereits eingerichteten LaCrosse-Sensor aus, um seine Messfunktionen und den Timeout anzupassen. Das bestehende Gerät und die Funk-ID bleiben erhalten.",
+        "data": {
+          "sensor_key": "Vorhandener Sensor"
+        }
+      },
+      "edit_sensor_settings": {
+        "title": "Sensoreinstellungen bearbeiten",
+        "description": "Passe die Einstellungen für {sensor_name} an. Der Sensorname, die Funk-ID und die bestehenden Gerätekennungen bleiben unverändert.",
+        "data": {
+          "multi_channel": "Zweikanal-Temperatursensor (TX25TP-IT)",
+          "has_humidity": "Luftfeuchtigkeit unterstützt",
+          "expire_after": "Nicht verfügbar nach"
+        },
+        "data_description": {
+          "multi_channel": "Aktivieren für Sensoren mit getrenntem internem und externem Temperaturfühler, beispielsweise den Technoline TX25TP-IT. Dadurch wird die externe Temperaturentität aktiviert und die Luftfeuchtigkeit deaktiviert.",
+          "has_humidity": "Aktivieren, wenn der Sensor Luftfeuchtigkeit misst. Bei aktiviertem Zweikanalmodus wird die Luftfeuchtigkeit automatisch deaktiviert.",
+          "expire_after": "Sekunden ohne Funkpaket, nach denen der Sensor als nicht verfügbar gilt."
         }
       },
       "replace_battery": {
