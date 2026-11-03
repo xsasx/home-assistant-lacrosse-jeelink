@@ -58,12 +58,14 @@
           "sensor_name": "Gerätename",
           "radio_id": "LaCrosse-Funk-ID",
           "expire_after": "Nicht verfügbar nach",
-          "has_humidity": "Luftfeuchtigkeit unterstützt"
+          "has_humidity": "Luftfeuchtigkeit unterstützt",
+          "multi_channel": "Zweikanal-Temperatursensor (TX25TP-IT)"
         },
         "data_description": {
           "radio_id": "Die vom Jeelink empfangene ID dieses Sensors.",
           "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt.",
-          "has_humidity": "Aktivieren, wenn der Sensor Temperatur und Luftfeuchtigkeit misst. Deaktivieren bei reinen Temperatursensoren. Diese Auswahl wird nicht automatisch überschrieben."
+          "has_humidity": "Aktivieren, wenn der Sensor Temperatur und Luftfeuchtigkeit misst. Deaktivieren bei reinen Temperatursensoren. Diese Auswahl wird nicht automatisch überschrieben.",
+          "multi_channel": "Aktivieren für Sensoren mit getrenntem internem und externem Temperaturfühler, beispielsweise den Technoline TX25TP-IT. Es werden zwei Temperaturentitäten angelegt und die Luftfeuchtigkeit wird deaktiviert."
         }
       },
       "scan_sensor": {
@@ -79,11 +81,13 @@
         "data": {
           "sensor_name": "Gerätename",
           "expire_after": "Nicht verfügbar nach",
-          "has_humidity": "Luftfeuchtigkeit unterstützt"
+          "has_humidity": "Luftfeuchtigkeit unterstützt",
+          "multi_channel": "Zweikanal-Temperatursensor (TX25TP-IT)"
         },
         "data_description": {
           "expire_after": "Sekunden ohne Funkpaket, nach denen das Gerät als nicht verfügbar gilt.",
-          "has_humidity": "Die Vorauswahl basiert auf dem zuletzt empfangenen Funkpaket. Bitte prüfe sie anhand des Sensormodells. Die bestätigte Auswahl bleibt dauerhaft erhalten."
+          "has_humidity": "Die Vorauswahl basiert auf dem zuletzt empfangenen Funkpaket. Bitte prüfe sie anhand des Sensormodells. Die bestätigte Auswahl bleibt dauerhaft erhalten.",
+          "multi_channel": "Aktivieren für Sensoren mit getrenntem internem und externem Temperaturfühler, beispielsweise den Technoline TX25TP-IT. Es werden zwei Temperaturentitäten angelegt und die Luftfeuchtigkeit wird deaktiviert."
         }
       },
       "replace_battery": {
