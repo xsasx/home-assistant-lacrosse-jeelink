@@ -48,7 +48,7 @@
           "raw_telegram_diagnostics": "Enable raw telegram diagnostics"
         },
         "data_description": {
-          "raw_telegram_diagnostics": "Disabled by default. Changing this setting reloads the integration. To display raw telegrams, DEBUG logging must also be enabled for custom_components.lacrosse_jeelink.diagnostic_receiver."
+          "raw_telegram_diagnostics": "Disabled by default. Changing this setting reloads the integration. To display raw telegrams, DEBUG logging must also be enabled for custom_components.lacrosse_jeelink.receiver."
         }
       },
       "add_sensor": {
@@ -133,6 +133,9 @@
     "sensor": {
       "temperature": {
         "name": "Temperature"
+      },
+      "temperature_external": {
+        "name": "External temperature"
       },
       "humidity": {
         "name": "Humidity"
