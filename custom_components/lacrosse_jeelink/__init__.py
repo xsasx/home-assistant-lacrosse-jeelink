@@ -24,7 +24,7 @@ from .const import (
     DOMAIN,
     PLATFORMS,
 )
-from .diagnostic_receiver import DiagnosticLaCrosse
+from .receiver import LaCrosseReceiver
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,13 +71,11 @@ async def async_setup_entry(
         is True
     )
 
-    receiver_class = (
-        DiagnosticLaCrosse
-        if raw_diagnostics_enabled
-        else pylacrosse.LaCrosse
+    lacrosse = LaCrosseReceiver(
+        device,
+        baud,
+        raw_diagnostics=raw_diagnostics_enabled,
     )
-
-    lacrosse = receiver_class(device, baud)
 
     if raw_diagnostics_enabled:
         _LOGGER.warning(
@@ -87,7 +85,7 @@ async def async_setup_entry(
         )
     else:
         _LOGGER.debug(
-            "LaCrosse Jeelink using standard pylacrosse receiver"
+            "LaCrosse Jeelink using shared receiver"
         )
 
     discovered_sensors: dict[int, dict[str, Any]] = {}
