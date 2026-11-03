@@ -48,7 +48,7 @@
           "raw_telegram_diagnostics": "Rohtelegramm-Diagnose aktivieren"
         },
         "data_description": {
-          "raw_telegram_diagnostics": "Standardmäßig deaktiviert. Beim Ändern wird die Integration neu geladen. Für die Ausgabe der Rohtelegramme muss zusätzlich DEBUG-Logging für custom_components.lacrosse_jeelink.diagnostic_receiver aktiviert sein."
+          "raw_telegram_diagnostics": "Standardmäßig deaktiviert. Beim Ändern wird die Integration neu geladen. Für die Ausgabe der Rohtelegramme muss zusätzlich DEBUG-Logging für custom_components.lacrosse_jeelink.receiver aktiviert sein."
         }
       },
       "add_sensor": {
@@ -133,6 +133,9 @@
     "sensor": {
       "temperature": {
         "name": "Temperatur"
+      },
+      "temperature_external": {
+        "name": "Temperatur extern"
       },
       "humidity": {
         "name": "Luftfeuchtigkeit"
