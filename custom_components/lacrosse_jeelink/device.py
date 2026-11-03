@@ -53,7 +53,15 @@ class LaCrosseDeviceData:
 
     def add_listener(self, listener: Callable[[], None]) -> None:
         """Register an entity update listener."""
-        self._listeners.append(listener)
+        if listener not in self._listeners:
+            self._listeners.append(listener)
+
+    def remove_listener(self, listener: Callable[[], None]) -> None:
+        """Unregister an entity update listener."""
+        try:
+            self._listeners.remove(listener)
+        except ValueError:
+            pass
 
     def _radio_callback(
         self,
