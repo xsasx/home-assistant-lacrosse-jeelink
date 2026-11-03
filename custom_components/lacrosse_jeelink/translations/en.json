@@ -58,12 +58,14 @@
           "sensor_name": "Device name",
           "radio_id": "LaCrosse radio ID",
           "expire_after": "Unavailable after",
-          "has_humidity": "Humidity supported"
+          "has_humidity": "Humidity supported",
+          "multi_channel": "Dual-temperature sensor (TX25TP-IT)"
         },
         "data_description": {
           "radio_id": "The ID received by Jeelink for this sensor.",
           "expire_after": "Seconds without a packet before the device is marked unavailable.",
-          "has_humidity": "Enable for sensors measuring both temperature and humidity. Disable for temperature-only sensors. This selection will not be overridden automatically."
+          "has_humidity": "Enable for sensors measuring both temperature and humidity. Disable for temperature-only sensors. This selection will not be overridden automatically.",
+          "multi_channel": "Enable for sensors with separate internal and external temperature probes, such as the Technoline TX25TP-IT. Two temperature entities will be created and humidity will be disabled."
         }
       },
       "scan_sensor": {
@@ -79,11 +81,13 @@
         "data": {
           "sensor_name": "Device name",
           "expire_after": "Unavailable after",
-          "has_humidity": "Humidity supported"
+          "has_humidity": "Humidity supported",
+          "multi_channel": "Dual-temperature sensor (TX25TP-IT)"
         },
         "data_description": {
           "expire_after": "Seconds without a packet before the device is marked unavailable.",
-          "has_humidity": "The suggested setting is based on the most recently received packet. Please verify it against the sensor model. Your confirmed selection will be preserved."
+          "has_humidity": "The suggested setting is based on the most recently received packet. Please verify it against the sensor model. Your confirmed selection will be preserved.",
+          "multi_channel": "Enable for sensors with separate internal and external temperature probes, such as the Technoline TX25TP-IT. Two temperature entities will be created and humidity will be disabled."
         }
       },
       "replace_battery": {
