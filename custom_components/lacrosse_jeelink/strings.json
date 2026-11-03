@@ -36,6 +36,7 @@
         "menu_options": {
           "add_sensor": "Add sensor manually",
           "scan_sensor": "Search for sensors",
+          "edit_sensor": "Edit existing sensor",
           "replace_battery": "Battery replacement / Reassign radio ID",
           "remove_sensor": "Remove sensor",
           "raw_telegram_diagnostics": "Raw telegram diagnostics"
@@ -88,6 +89,27 @@
           "expire_after": "Seconds without a packet before the device is marked unavailable.",
           "has_humidity": "The suggested setting is based on the most recently received packet. Please verify it against the sensor model. Your confirmed selection will be preserved.",
           "multi_channel": "Enable for sensors with separate internal and external temperature probes, such as the Technoline TX25TP-IT. Two temperature entities will be created and humidity will be disabled."
+        }
+      },
+      "edit_sensor": {
+        "title": "Edit existing sensor",
+        "description": "Select a configured LaCrosse sensor to change its measurement capabilities and availability timeout. The existing device and radio ID will be preserved.",
+        "data": {
+          "sensor_key": "Existing sensor"
+        }
+      },
+      "edit_sensor_settings": {
+        "title": "Edit sensor settings",
+        "description": "Update the settings for {sensor_name}. The sensor name, radio ID and existing device identifiers will remain unchanged.",
+        "data": {
+          "multi_channel": "Dual-temperature sensor (TX25TP-IT)",
+          "has_humidity": "Humidity supported",
+          "expire_after": "Unavailable after"
+        },
+        "data_description": {
+          "multi_channel": "Enable for sensors with separate internal and external temperature probes, such as the Technoline TX25TP-IT. This enables the external temperature entity and disables humidity.",
+          "has_humidity": "Enable if the sensor measures humidity. Humidity is automatically disabled when dual-temperature mode is enabled.",
+          "expire_after": "Seconds without a packet before the sensor is marked unavailable."
         }
       },
       "replace_battery": {
