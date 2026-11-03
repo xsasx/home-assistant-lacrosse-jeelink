@@ -1,3 +1,4 @@
+
 """Sensor platform for LaCrosse Jeelink."""
 
 from __future__ import annotations
@@ -23,6 +24,9 @@ from .device import LaCrosseDeviceData
 from .entity import LaCrosseEntity
 
 
+CONF_MULTI_CHANNEL = "multi_channel"
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: LaCrosseConfigEntry,
@@ -44,6 +48,10 @@ async def async_setup_entry(
     for sensor_key, sensor_config in sensors_config.items():
         data = device_data.get(sensor_key)
 
+        multi_channel = (
+            sensor_config.get(CONF_MULTI_CHANNEL, False) is True
+        )
+
         if data is None:
             data = LaCrosseDeviceData(
                 hass=hass,
@@ -55,11 +63,13 @@ async def async_setup_entry(
                         DEFAULT_EXPIRE_AFTER,
                     )
                 ),
+                multi_channel=multi_channel,
             )
             device_data[sensor_key] = data
 
         name = sensor_config["name"]
 
+        # Preserve the existing temperature entity and unique ID.
         entities.append(
             LaCrosseTemperature(
                 data,
@@ -69,9 +79,25 @@ async def async_setup_entry(
             )
         )
 
+        if multi_channel:
+            entities.append(
+                LaCrosseExternalTemperature(
+                    data,
+                    entry.entry_id,
+                    sensor_key,
+                    name,
+                )
+            )
+
         # Existing configurations created before has_humidity was
         # introduced default to True for backwards compatibility.
-        if sensor_config.get(CONF_HAS_HUMIDITY, True):
+        #
+        # TX25TP-IT packets do not contain valid humidity readings
+        # in the observed protocol format.
+        if (
+            not multi_channel
+            and sensor_config.get(CONF_HAS_HUMIDITY, True)
+        ):
             entities.append(
                 LaCrosseHumidity(
                     data,
@@ -109,8 +135,42 @@ class LaCrosseTemperature(LaCrosseEntity, SensorEntity):
 
     @property
     def native_value(self) -> float | None:
-        """Return temperature."""
+        """Return primary temperature."""
         return self.data.temperature
+
+
+class LaCrosseExternalTemperature(LaCrosseEntity, SensorEntity):
+    """External temperature of a dual-channel LaCrosse sensor."""
+
+    _attr_translation_key = "temperature_external"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+
+    def __init__(
+        self,
+        data,
+        entry_id: str,
+        sensor_key: str,
+        device_name: str,
+    ) -> None:
+        super().__init__(
+            data,
+            entry_id,
+            sensor_key,
+            device_name,
+            "temperature_external",
+        )
+
+    @property
+    def available(self) -> bool:
+        """Return whether external temperature is available."""
+        return self.data.external_available
+
+    @property
+    def native_value(self) -> float | None:
+        """Return external temperature."""
+        return self.data.temperature_external
 
 
 class LaCrosseHumidity(LaCrosseEntity, SensorEntity):
