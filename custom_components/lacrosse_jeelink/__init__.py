@@ -1,4 +1,3 @@
-
 """LaCrosse Jeelink integration."""
 
 from __future__ import annotations
@@ -30,7 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 
 CONF_HUMIDITY_MODE = "humidity_mode"
 HUMIDITY_MODE_MANUAL = "manual"
-
+CONF_MULTI_CHANNEL = "multi_channel"
 CONF_RAW_TELEGRAM_DIAGNOSTICS = "raw_telegram_diagnostics"
 
 
@@ -101,6 +100,10 @@ async def async_setup_entry(
             if sensor_config is None:
                 return
 
+            # Dual-temperature sensors do not expose humidity.
+            if sensor_config.get(CONF_MULTI_CHANNEL, False):
+                return
+
             # Never override an explicit user choice.
             if (
                 sensor_config.get(CONF_HUMIDITY_MODE)
@@ -150,6 +153,10 @@ async def async_setup_entry(
             if int(sensor_config[CONF_RADIO_ID]) != sensor_id:
                 continue
 
+            # Dual-temperature sensors never gain a humidity entity.
+            if sensor_config.get(CONF_MULTI_CHANNEL, False):
+                return
+
             # A manually configured capability is authoritative.
             if (
                 sensor_config.get(CONF_HUMIDITY_MODE)
@@ -176,15 +183,22 @@ async def async_setup_entry(
         humidity: int,
         low_battery: bool,
         new_battery: bool,
+        raw_flags: int | None,
     ) -> None:
-        """Update discovery and retain the latest new-battery event."""
+        """Update discovery and retain genuine new-battery events."""
         now = datetime.now(timezone.utc)
         previous = discovered_sensors.get(sensor_id)
 
-        # Normal packets must not erase a new-battery event.
+        # On the TX25TP-IT, flag 130 identifies the external probe.
+        # Its high bit must not count as a new-battery event, including
+        # when the radio ID has not yet been configured.
+        external_temperature_packet = raw_flags == 130
+        genuine_new_battery = new_battery and not external_temperature_packet
+
+        # Normal packets must not erase a genuine new-battery event.
         last_new_battery_seen = (
             now
-            if new_battery
+            if genuine_new_battery
             else (
                 previous.get("last_new_battery_seen")
                 if previous is not None
@@ -197,22 +211,25 @@ async def async_setup_entry(
             "temperature": temperature,
             "humidity": humidity,
             "low_battery": low_battery,
-            "new_battery": new_battery,
+            "new_battery": genuine_new_battery,
             "last_seen": now,
             "last_new_battery_seen": last_new_battery_seen,
         }
 
         _LOGGER.debug(
             "LaCrosse sensor discovered: ID %s, temperature %.1f °C, "
-            "humidity %s %%, low battery %s, new battery %s",
+            "humidity %s %%, low battery %s, new battery %s, raw flags %s",
             sensor_id,
             temperature,
             humidity,
             low_battery,
-            new_battery,
+            genuine_new_battery,
+            raw_flags,
         )
 
-        check_existing_sensor_capabilities(sensor_id, humidity)
+        # The external probe's last byte is not a humidity reading.
+        if not external_temperature_packet:
+            check_existing_sensor_capabilities(sensor_id, humidity)
 
     def discovery_callback(sensor: Any, _user_data: Any) -> None:
         """Receive every LaCrosse sensor packet."""
@@ -223,6 +240,7 @@ async def async_setup_entry(
             int(sensor.humidity),
             bool(sensor.low_battery),
             bool(sensor.new_battery),
+            getattr(sensor, "raw_flags", None),
         )
 
     lacrosse.register_all(discovery_callback)
