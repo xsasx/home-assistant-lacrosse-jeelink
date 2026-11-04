@@ -1,4 +1,3 @@
-
 {
   "title": "LaCrosse Jeelink",
   "config": {
@@ -39,7 +38,9 @@
           "edit_sensor": "Vorhandenen Sensor bearbeiten",
           "replace_battery": "Batteriewechsel / Funk-ID neu zuordnen",
           "remove_sensor": "Sensor entfernen",
-          "raw_telegram_diagnostics": "Rohtelegramm-Diagnose"
+          "raw_telegram_diagnostics": "Rohtelegramm-Diagnose",
+          "ignore_sensor": "Gefundenen Sensor ignorieren",
+          "restore_ignored_sensor": "Ignorierten Sensor wiederherstellen"
         }
       },
       "raw_telegram_diagnostics": {
@@ -71,7 +72,7 @@
       },
       "scan_sensor": {
         "title": "LaCrosse-Sensor suchen",
-        "description": "Hier werden alle LaCrosse-Sensoren angezeigt, die der Jeelink seit dem Start der Integration empfangen hat. Wähle einen neuen Sensor aus.",
+        "description": "Hier werden die seit dem Start der JeeLink-Integration empfangenen Sensoren mit dem Alter des letzten Funktelegramms angezeigt. STALE bedeutet, dass seit mindestens 10 Minuten kein Telegramm empfangen wurde. Ignorierte Funk-IDs werden ausgeblendet. Wähle „Refresh discovery list“, um die Anzeige zu aktualisieren.",
         "data": {
           "discovered_sensor": "Gefundener Sensor"
         }
@@ -138,6 +139,20 @@
         "data": {
           "sensor_key": "Sensor"
         }
+      },
+      "ignore_sensor": {
+        "title": "Gefundene Funk-ID ignorieren",
+        "description": "Wähle eine unerwünschte, noch nicht konfigurierte Funk-ID aus. Sie wird in der Sensorsuche ausgeblendet, bis du sie wieder freigibst.",
+        "data": {
+          "ignored_sensor": "Zu ignorierende Funk-ID"
+        }
+      },
+      "restore_ignored_sensor": {
+        "title": "Ignorierte Funk-ID wieder freigeben",
+        "description": "Wähle eine ignorierte Funk-ID aus, damit sie wieder in der Sensorsuche angezeigt wird.",
+        "data": {
+          "ignored_sensor": "Wieder freizugebende Funk-ID"
+        }
       }
     },
     "error": {
@@ -152,7 +167,8 @@
     "abort": {
       "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert.",
       "no_discovered_sensors": "Es wurden noch keine LaCrosse-Sensoren empfangen. Warte kurz oder nimm beim gewünschten Sensor die Batterien kurz heraus und setze sie wieder ein.",
-      "sensor_already_configured": "Dieser LaCrosse-Sensor ist bereits konfiguriert."
+      "sensor_already_configured": "Dieser LaCrosse-Sensor ist bereits konfiguriert.",
+      "no_ignored_sensors": "Es sind keine ignorierten Funk-IDs vorhanden."
     }
   },
   "entity": {
