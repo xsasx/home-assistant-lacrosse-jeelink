@@ -44,6 +44,7 @@ class LaCrosseDeviceData:
         self._expiration_cancel: Callable[[], None] | None = None
         self._external_expiration_cancel: Callable[[], None] | None = None
         self._listeners: list[Callable[[], None]] = []
+        self._shutdown = False
 
         lacrosse.register_callback(
             radio_id,
@@ -53,7 +54,7 @@ class LaCrosseDeviceData:
 
     def add_listener(self, listener: Callable[[], None]) -> None:
         """Register an entity update listener."""
-        if listener not in self._listeners:
+        if not self._shutdown and listener not in self._listeners:
             self._listeners.append(listener)
 
     def remove_listener(self, listener: Callable[[], None]) -> None:
@@ -63,12 +64,33 @@ class LaCrosseDeviceData:
         except ValueError:
             pass
 
+    @callback
+    def async_shutdown(self) -> None:
+        """Cancel expiration timers and release entity listeners."""
+        if self._shutdown:
+            return
+
+        self._shutdown = True
+
+        if self._expiration_cancel is not None:
+            self._expiration_cancel()
+            self._expiration_cancel = None
+
+        if self._external_expiration_cancel is not None:
+            self._external_expiration_cancel()
+            self._external_expiration_cancel = None
+
+        self._listeners.clear()
+
     def _radio_callback(
         self,
         lacrosse_sensor: Any,
         _user_data: Any,
     ) -> None:
         """Receive data from pylacrosse's reader thread."""
+        if self._shutdown:
+            return
+
         temperature = lacrosse_sensor.temperature
         humidity = lacrosse_sensor.humidity
         low_battery = lacrosse_sensor.low_battery
@@ -98,6 +120,9 @@ class LaCrosseDeviceData:
         raw_flags: int | None = None,
     ) -> None:
         """Handle a packet in Home Assistant's event loop."""
+        if self._shutdown:
+            return
+
         self.raw_flags = raw_flags
 
         if self.multi_channel:
@@ -170,6 +195,10 @@ class LaCrosseDeviceData:
     def _mark_expired(self, _now: datetime) -> None:
         """Mark the primary sensor unavailable."""
         self._expiration_cancel = None
+
+        if self._shutdown:
+            return
+
         self.available = False
         self._notify_listeners()
 
@@ -177,11 +206,18 @@ class LaCrosseDeviceData:
     def _mark_external_expired(self, _now: datetime) -> None:
         """Mark the external temperature unavailable."""
         self._external_expiration_cancel = None
+
+        if self._shutdown:
+            return
+
         self.external_available = False
         self._notify_listeners()
 
     @callback
     def _notify_listeners(self) -> None:
         """Notify all entities for this physical sensor."""
+        if self._shutdown:
+            return
+
         for listener in self._listeners:
             listener()
