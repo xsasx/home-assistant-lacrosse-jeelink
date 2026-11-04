@@ -14,4 +14,4 @@ DEFAULT_BAUD = 57600
 DEFAULT_EXPIRE_AFTER = 300
 DEFAULT_DEVICE = "/dev/ttyUSB0"
 
-PLATFORMS = ["sensor", "binary_sensor"]
+PLATFORMS = ["sensor", "binary_sensor", "switch"]
