@@ -348,6 +348,11 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             for sensor in configured_sensors.values()
         }
 
+        # Refreshing the options step re-reads the live discovery cache.
+        # Do not silently delete old discoveries: radio sensors can be
+        # temporarily out of range or have flat batteries.
+        now = datetime.now(timezone.utc)
+        stale_after = timedelta(minutes=10)
         choices: dict[str, str] = {}
 
         for radio_id in sorted(discovered):
@@ -356,6 +361,23 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             temperature = sensor["temperature"]
             humidity = sensor["humidity"]
             low_battery = sensor["low_battery"]
+            last_seen = sensor.get("last_seen")
+            if isinstance(last_seen, datetime):
+                age = now - last_seen
+                if age < timedelta(0):
+                    age = timedelta(0)
+                age_minutes = int(age.total_seconds() // 60)
+                freshness = (
+                    f"STALE ({age_minutes} min ago)"
+                    if age >= stale_after
+                    else (
+                        "ACTIVE (just now)"
+                        if age_minutes == 0
+                        else f"ACTIVE ({age_minutes} min ago)"
+                    )
+                )
+            else:
+                freshness = "UNKNOWN last seen"
 
             battery_text = "LOW" if low_battery else "OK"
 
@@ -383,13 +405,13 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     f"ID {radio_id} — "
                     f"{measurement_text} — "
                     f"Battery {battery_text} — "
-                    f"{configured_name}"
+                    f"{freshness} — {configured_name}"
                 )
             else:
                 label = (
                     f"ID {radio_id} — "
                     f"{measurement_text} — "
-                    f"Battery {battery_text} — NEW"
+                    f"Battery {battery_text} — {freshness} — NEW"
                 )
 
             choices[str(radio_id)] = label
