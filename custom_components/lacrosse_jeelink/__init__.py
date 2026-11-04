@@ -1,3 +1,4 @@
+
 """LaCrosse Jeelink integration."""
 
 from __future__ import annotations
@@ -293,10 +294,19 @@ async def async_unload_entry(
     )
 
     if unload_ok:
-        hass.data.get("lacrosse_jeelink_device_data", {}).pop(
-            entry.entry_id,
-            None,
+        # Stop all device timers and release listeners before
+        # removing the shared device cache.
+        all_device_data = hass.data.get(
+            "lacrosse_jeelink_device_data",
+            {},
         )
+        entry_device_data = all_device_data.pop(
+            entry.entry_id,
+            {},
+        )
+
+        for data in entry_device_data.values():
+            data.async_shutdown()
 
         try:
             await hass.async_add_executor_job(
