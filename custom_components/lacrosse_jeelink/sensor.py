@@ -10,6 +10,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import PERCENTAGE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import LaCrosseConfigEntry
@@ -36,6 +37,7 @@ async def async_setup_entry(
 
     sensors_config = entry.options.get(CONF_SENSORS, {})
     entities: list[SensorEntity] = []
+    entity_registry = er.async_get(hass)
 
     device_data = hass.data.setdefault(
         "lacrosse_jeelink_device_data",
@@ -106,6 +108,24 @@ async def async_setup_entry(
                     name,
                 )
             )
+        else:
+            # A disabled humidity capability must also remove the
+            # previously registered entity. Merely skipping entity
+            # creation leaves an orphaned, unavailable HA entity.
+            #
+            # Use the exact stable unique ID so temperature and other
+            # sensors remain untouched. Re-enabling humidity later
+            # recreates the entity with the same unique ID.
+            humidity_unique_id = (
+                f"{entry.entry_id}_{sensor_key}_humidity"
+            )
+            humidity_entity_id = entity_registry.async_get_entity_id(
+                "sensor",
+                "lacrosse_jeelink",
+                humidity_unique_id,
+            )
+            if humidity_entity_id is not None:
+                entity_registry.async_remove(humidity_entity_id)
 
     async_add_entities(entities)
 
