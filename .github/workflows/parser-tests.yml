@@ -7,10 +7,12 @@ on:
       - main
     paths:
       - "tests/**"
+      - "custom_components/lacrosse_jeelink/**"
       - ".github/workflows/parser-tests.yml"
   pull_request:
     paths:
       - "tests/**"
+      - "custom_components/lacrosse_jeelink/**"
       - ".github/workflows/parser-tests.yml"
   workflow_dispatch:
 
