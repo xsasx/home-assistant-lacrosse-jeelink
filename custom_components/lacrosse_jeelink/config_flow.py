@@ -38,6 +38,7 @@ CONF_HUMIDITY_MODE = "humidity_mode"
 HUMIDITY_MODE_MANUAL = "manual"
 CONF_RAW_TELEGRAM_DIAGNOSTICS = "raw_telegram_diagnostics"
 CONF_MULTI_CHANNEL = "multi_channel"
+CONF_IGNORED_RADIO_IDS = "ignored_radio_ids"
 
 
 def _has_valid_humidity(humidity: int | None) -> bool:
@@ -189,11 +190,95 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             menu_options=[
                 "add_sensor",
                 "scan_sensor",
+                "ignore_sensor",
+                "restore_ignored_sensor",
                 "edit_sensor",
                 "replace_battery",
                 "remove_sensor",
                 "raw_telegram_diagnostics",
             ],
+        )
+
+    async def async_step_ignore_sensor(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Ignore an unconfigured radio ID found during discovery."""
+        discovered = self.config_entry.runtime_data.discovered_sensors
+        ignored = {
+            int(value)
+            for value in self.config_entry.options.get(
+                CONF_IGNORED_RADIO_IDS, []
+            )
+        }
+        configured = {
+            int(sensor[CONF_RADIO_ID])
+            for sensor in self.config_entry.options.get(
+                CONF_SENSORS, {}
+            ).values()
+        }
+        candidates = {
+            str(radio_id): f"ID {radio_id}"
+            for radio_id in sorted(discovered)
+            if radio_id not in ignored and radio_id not in configured
+        }
+        if not candidates:
+            return self.async_abort(reason="no_discovered_sensors")
+
+        if user_input is not None:
+            radio_id = int(user_input["ignored_sensor"])
+            if str(radio_id) not in candidates:
+                return self.async_abort(reason="no_discovered_sensors")
+            ignored.add(radio_id)
+            return self.async_create_entry(
+                data={
+                    **self.config_entry.options,
+                    CONF_IGNORED_RADIO_IDS: sorted(ignored),
+                }
+            )
+
+        return self.async_show_form(
+            step_id="ignore_sensor",
+            data_schema=vol.Schema(
+                {vol.Required("ignored_sensor"): vol.In(candidates)}
+            ),
+        )
+
+    async def async_step_restore_ignored_sensor(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Allow a previously ignored radio ID to appear in discovery."""
+        ignored = {
+            int(value)
+            for value in self.config_entry.options.get(
+                CONF_IGNORED_RADIO_IDS, []
+            )
+        }
+        if not ignored:
+            return self.async_abort(reason="no_ignored_sensors")
+
+        choices = {
+            str(radio_id): f"ID {radio_id}"
+            for radio_id in sorted(ignored)
+        }
+        if user_input is not None:
+            radio_id = int(user_input["ignored_sensor"])
+            if radio_id not in ignored:
+                return self.async_abort(reason="no_ignored_sensors")
+            ignored.remove(radio_id)
+            return self.async_create_entry(
+                data={
+                    **self.config_entry.options,
+                    CONF_IGNORED_RADIO_IDS: sorted(ignored),
+                }
+            )
+
+        return self.async_show_form(
+            step_id="restore_ignored_sensor",
+            data_schema=vol.Schema(
+                {vol.Required("ignored_sensor"): vol.In(choices)}
+            ),
         )
 
     async def async_step_raw_telegram_diagnostics(
@@ -355,7 +440,16 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
         stale_after = timedelta(minutes=10)
         choices: dict[str, str] = {}
 
+        ignored_ids = {
+            int(value)
+            for value in self.config_entry.options.get(
+                CONF_IGNORED_RADIO_IDS, []
+            )
+        }
+
         for radio_id in sorted(discovered):
+            if radio_id in ignored_ids and radio_id not in configured_ids:
+                continue
             sensor = discovered[radio_id]
 
             temperature = sensor["temperature"]
