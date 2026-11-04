@@ -197,6 +197,11 @@ class LaCrosseHumidity(LaCrosseEntity, SensorEntity):
         )
 
     @property
+    def available(self) -> bool:
+        """Return whether valid humidity data is available."""
+        return self.data.humidity_available
+
+    @property
     def native_value(self) -> int | None:
-        """Return humidity."""
+        """Return the last valid humidity reading."""
         return self.data.humidity
