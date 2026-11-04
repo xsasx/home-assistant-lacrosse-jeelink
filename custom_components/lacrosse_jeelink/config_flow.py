@@ -416,8 +416,15 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
 
             choices[str(radio_id)] = label
 
+        # Selecting refresh submits the form and rebuilds the choices
+        # from the latest received radio packets without reloading Jeelink.
+        choices["__refresh__"] = "↻ Refresh discovery list"
+
         if user_input is not None:
-            radio_id = int(user_input["discovered_sensor"])
+            selected = user_input["discovered_sensor"]
+            if selected == "__refresh__":
+                return await self.async_step_scan_sensor()
+            radio_id = int(selected)
 
             if radio_id in configured_ids:
                 return self.async_abort(
