@@ -1,4 +1,3 @@
-
 {
   "title": "LaCrosse Jeelink",
   "config": {
@@ -39,7 +38,9 @@
           "edit_sensor": "Edit existing sensor",
           "replace_battery": "Battery replacement / Reassign radio ID",
           "remove_sensor": "Remove sensor",
-          "raw_telegram_diagnostics": "Raw telegram diagnostics"
+          "raw_telegram_diagnostics": "Raw telegram diagnostics",
+          "ignore_sensor": "Ignore discovered sensor",
+          "restore_ignored_sensor": "Restore ignored sensor"
         }
       },
       "raw_telegram_diagnostics": {
@@ -71,7 +72,7 @@
       },
       "scan_sensor": {
         "title": "Search for LaCrosse sensors",
-        "description": "All LaCrosse sensors received by the Jeelink since the integration was started are shown here. Select a new sensor.",
+        "description": "Sensors received since the JeeLink integration started are shown here, including the age of the last received packet. STALE means no packet has been received for at least 10 minutes. Ignored radio IDs are hidden. Select Refresh discovery list to update the displayed values.",
         "data": {
           "discovered_sensor": "Discovered sensor"
         }
@@ -138,6 +139,20 @@
         "data": {
           "sensor_key": "Sensor"
         }
+      },
+      "ignore_sensor": {
+        "title": "Ignore discovered radio ID",
+        "description": "Select an unwanted, unconfigured radio ID. It will be hidden from the discovery list until you restore it.",
+        "data": {
+          "ignored_sensor": "Radio ID to ignore"
+        }
+      },
+      "restore_ignored_sensor": {
+        "title": "Restore ignored radio ID",
+        "description": "Select an ignored radio ID to make it visible in discovery again.",
+        "data": {
+          "ignored_sensor": "Radio ID to restore"
+        }
       }
     },
     "error": {
@@ -152,7 +167,8 @@
     "abort": {
       "no_sensors": "No LaCrosse sensors are configured.",
       "no_discovered_sensors": "No LaCrosse sensors have been received yet. Wait a moment or remove and reinsert the batteries in the sensor you want to discover.",
-      "sensor_already_configured": "This LaCrosse sensor is already configured."
+      "sensor_already_configured": "This LaCrosse sensor is already configured.",
+      "no_ignored_sensors": "There are no ignored radio IDs to restore."
     }
   },
   "entity": {
