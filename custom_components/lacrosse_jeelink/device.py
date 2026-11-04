@@ -29,20 +29,25 @@ class LaCrosseDeviceData:
         self.expire_after = expire_after
         self.multi_channel = multi_channel
 
-        # Existing temperature and humidity properties are preserved.
+        # Primary sensor state.
         self.temperature: float | None = None
         self.humidity: int | None = None
         self.low_battery: bool | None = None
         self.new_battery: bool | None = None
         self.available = False
 
-        # Additional channel state for dual-temperature sensors.
+        # Dual-temperature sensor state.
         self.temperature_external: float | None = None
         self.external_available = False
         self.raw_flags: int | None = None
 
+        # Independent humidity availability.
+        self.humidity_available = False
+
         self._expiration_cancel: Callable[[], None] | None = None
         self._external_expiration_cancel: Callable[[], None] | None = None
+        self._humidity_expiration_cancel: Callable[[], None] | None = None
+
         self._listeners: list[Callable[[], None]] = []
         self._shutdown = False
 
@@ -72,13 +77,15 @@ class LaCrosseDeviceData:
 
         self._shutdown = True
 
-        if self._expiration_cancel is not None:
-            self._expiration_cancel()
-            self._expiration_cancel = None
-
-        if self._external_expiration_cancel is not None:
-            self._external_expiration_cancel()
-            self._external_expiration_cancel = None
+        for cancel_attribute in (
+            "_expiration_cancel",
+            "_external_expiration_cancel",
+            "_humidity_expiration_cancel",
+        ):
+            cancel = getattr(self, cancel_attribute)
+            if cancel is not None:
+                cancel()
+                setattr(self, cancel_attribute, None)
 
         self._listeners.clear()
 
@@ -126,9 +133,7 @@ class LaCrosseDeviceData:
         self.raw_flags = raw_flags
 
         if self.multi_channel:
-            # TX25TP-IT packet patterns confirmed by raw telegrams
-            # from a tester. Only apply these to explicitly
-            # configured dual-temperature sensors.
+            # TX25TP-IT: external temperature packet.
             if raw_flags == 130:
                 self.temperature_external = temperature
                 self.external_available = True
@@ -136,19 +141,28 @@ class LaCrosseDeviceData:
                 self._notify_listeners()
                 return
 
+            # TX25TP-IT: internal temperature packet.
             if raw_flags != 1:
-                # Do not assign unknown packets to either channel.
                 return
 
-            # The TX25TP-IT does not provide valid relative
-            # humidity in the observed packet format.
+            # Dual-temperature packets do not contain humidity.
             humidity = None
 
         self.temperature = temperature
-        self.humidity = humidity
         self.low_battery = low_battery
         self.new_battery = new_battery
         self.available = True
+
+        # Only valid humidity readings update the humidity state.
+        # Invalid values must never reset its expiration timer.
+        if (
+            not self.multi_channel
+            and humidity is not None
+            and 0 <= humidity <= 100
+        ):
+            self.humidity = humidity
+            self.humidity_available = True
+            self._schedule_humidity_expiration()
 
         self._schedule_expiration()
         self._notify_listeners()
@@ -192,6 +206,26 @@ class LaCrosseDeviceData:
             )
 
     @callback
+    def _schedule_humidity_expiration(self) -> None:
+        """Schedule expiration after the last valid humidity packet."""
+        if self._humidity_expiration_cancel is not None:
+            self._humidity_expiration_cancel()
+            self._humidity_expiration_cancel = None
+
+        if self.expire_after > 0:
+            expiration_at = (
+                dt_util.utcnow()
+                + timedelta(seconds=self.expire_after)
+            )
+            self._humidity_expiration_cancel = (
+                async_track_point_in_utc_time(
+                    self.hass,
+                    self._mark_humidity_expired,
+                    expiration_at,
+                )
+            )
+
+    @callback
     def _mark_expired(self, _now: datetime) -> None:
         """Mark the primary sensor unavailable."""
         self._expiration_cancel = None
@@ -211,6 +245,17 @@ class LaCrosseDeviceData:
             return
 
         self.external_available = False
+        self._notify_listeners()
+
+    @callback
+    def _mark_humidity_expired(self, _now: datetime) -> None:
+        """Mark humidity unavailable without removing its entity."""
+        self._humidity_expiration_cancel = None
+
+        if self._shutdown:
+            return
+
+        self.humidity_available = False
         self._notify_listeners()
 
     @callback
