@@ -7,8 +7,12 @@ The project is intended as a UI-configurable replacement for the legacy YAML-onl
 
 Each physical radio sensor is represented as one Home Assistant device with its related entities grouped underneath it.
 
-> **Current beta:** v0.3.0-beta.3  
-> This release introduces optional raw telegram diagnostics to help investigate unexpected radio IDs and unsupported telegram formats.
+> **Current beta:** [v0.3.0-beta.5](https://github.com/xsasx/home-assistant-lacrosse-jeelink/releases/tag/0.3.0-beta.5)  
+> This beta improves humidity handling, filters invalid readings, and tracks humidity availability independently. TX25TP-IT dual-temperature support is also available for community testing.
+
+## 🗺️ Development roadmap
+
+See the [public development roadmap](ROADMAP.md) for planned features, upcoming versions, and ways to contribute. Follow progress through [GitHub milestones](https://github.com/xsasx/home-assistant-lacrosse-jeelink/milestones).
 
 ## ☕ Support the project
 
@@ -33,7 +37,7 @@ The following LaCrosse / Technoline sensors have been successfully tested with t
 
 The **TX29D-IT** and **TX29-IT** are temperature-only sensors and do not provide humidity measurements.
 
-These sensors may report an invalid humidity value of `106 %`. This is a known issue and will be handled by the integration in a future update.
+These sensors may report an invalid humidity value of `106 %`. Starting with v0.3.0-beta.5, invalid humidity values are ignored; the humidity entity may show as unavailable while temperature readings continue.
 
 Other compatible LaCrosse / Technoline sensors may also work even if they are not listed here.
 
