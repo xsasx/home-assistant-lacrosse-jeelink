@@ -162,7 +162,8 @@
       "no_new_radio_id": "Es wurde noch keine passende neue Funk-ID erkannt. Setze die Batterien erneut ein und versuche es noch einmal.",
       "multiple_radio_ids": "Es wurden mehrere mögliche Funk-IDs erkannt. Eine automatische Zuordnung ist nicht möglich.",
       "sensor_not_found": "Der ausgewählte Sensor existiert nicht mehr.",
-      "radio_id_changed": "Die Sensorkonfiguration wurde zwischenzeitlich geändert. Starte die Zuordnung erneut."
+      "radio_id_changed": "Die Sensorkonfiguration wurde zwischenzeitlich geändert. Starte die Zuordnung erneut.",
+      "ignored_radio_id_detected": "Eine neu erkannte Funk-ID steht auf deiner Ignorierliste. Um sie diesem Sensor zuzuordnen, gib die Funk-ID zuerst über „Ignorierten Sensor wiederherstellen“ frei. Starte danach den Batteriewechsel-Assistenten erneut und vergewissere dich, dass es der richtige physische Sensor ist."
     },
     "abort": {
       "no_sensors": "Es sind keine LaCrosse-Sensoren konfiguriert.",
