@@ -7,8 +7,9 @@ The project is intended as a UI-configurable replacement for the legacy YAML-onl
 
 Each physical radio sensor is represented as one Home Assistant device with its related entities grouped underneath it.
 
-> **Current beta:** [v0.3.0-beta.5](https://github.com/xsasx/home-assistant-lacrosse-jeelink/releases/tag/0.3.0-beta.5)  
-> This beta improves humidity handling, filters invalid readings, and tracks humidity availability independently. TX25TP-IT dual-temperature support is also available for community testing.
+> **Current version: v0.3.0 (stable release preparation).** The integration now includes TX25TP-IT dual-temperature support, humidity reliability improvements, sensor ignore/restore management, and discovery freshness controls.
+>
+> Install the latest published stable version from [GitHub Releases](https://github.com/xsasx/home-assistant-lacrosse-jeelink/releases). The v0.3.0 release will be available there once published.
 
 ## 🗺️ Development roadmap
 
@@ -40,7 +41,7 @@ The **TX25TP-IT** is a dual-temperature sensor. Enable **Dual-temperature sensor
 
 The **TX29D-IT** and **TX29-IT** are temperature-only sensors and do not provide humidity measurements.
 
-These sensors may report an invalid humidity value of `106 %`. Starting with v0.3.0-beta.5, invalid humidity values are ignored; the humidity entity may show as unavailable while temperature readings continue.
+These sensors may report an invalid humidity value of `106 %`. In v0.3.0, invalid humidity readings are ignored; the humidity entity may show as unavailable while temperature readings continue.
 
 Other compatible LaCrosse / Technoline sensors may also work even if they are not listed here.
 
@@ -60,6 +61,11 @@ If you successfully test another model, please let me know through GitHub Issues
 - Configurable availability timeout
 - Sensor discovery and management through integration options
 - Detection of already configured radio IDs
+- Ignore and restore unwanted radio IDs in discovery
+- Discovery freshness indicators (ACTIVE/STALE), refresh, and optional stale-sensor filter
+- Dual-temperature support for TX25TP-IT (internal and external probes)
+- Per-device humidity measurement switch and safe handling of invalid humidity packets
+- Battery replacement protection against ignored radio IDs
 - English and German UI translations
 - Optional raw telegram diagnostics for troubleshooting
 
@@ -292,9 +298,9 @@ For raw serial telegram analysis, use the optional diagnostic feature described 
 
 ## Development status
 
-This project is currently an early release.
+Version **v0.3.0** is the next stable release, with community-tested sensor compatibility and automated regression tests. Its GitHub release is being prepared.
 
-Please test beta versions on a Home Assistant installation with a recent backup before relying on them for critical monitoring.
+Keep a recent Home Assistant backup before updating, especially when sensors are used for important monitoring or automations.
 
 Bug reports, compatibility feedback, and contributions are welcome.
 
