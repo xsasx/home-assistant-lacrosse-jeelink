@@ -162,7 +162,8 @@
       "no_new_radio_id": "No suitable new radio ID has been detected yet. Replace the batteries and try again.",
       "multiple_radio_ids": "Multiple possible radio IDs were detected. The sensor cannot be assigned automatically.",
       "sensor_not_found": "The selected sensor no longer exists.",
-      "radio_id_changed": "The sensor configuration has changed. Restart the reassignment."
+      "radio_id_changed": "The sensor configuration has changed. Restart the reassignment.",
+      "ignored_radio_id_detected": "A newly detected radio ID is on your ignored list. To assign it to this sensor, first restore the radio ID using 'Restore ignored sensor', then restart battery replacement and confirm the correct physical sensor."
     },
     "abort": {
       "no_sensors": "No LaCrosse sensors are configured.",
