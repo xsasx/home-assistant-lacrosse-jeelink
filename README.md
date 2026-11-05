@@ -32,8 +32,11 @@ The following LaCrosse / Technoline sensors have been successfully tested with t
 | Technoline TX35DTH-IT | ✅ | ✅ | Tested |
 | Technoline TX29D-IT | ✅ | ❌ | Tested |
 | Technoline TX29-IT | ✅ | ❌ | Tested |
+| Technoline TX25TP-IT | ✅ (internal + external) | ❌ | Tested with 4 devices (community) |
 
 ### Temperature-only sensors
+
+The **TX25TP-IT** is a dual-temperature sensor. Enable **Dual-temperature sensor (TX25TP-IT)** in sensor settings to expose separate internal and external temperature entities. Humidity is not supported. Community testing with four devices confirmed separate, plausible readings for both channels.
 
 The **TX29D-IT** and **TX29-IT** are temperature-only sensors and do not provide humidity measurements.
 
