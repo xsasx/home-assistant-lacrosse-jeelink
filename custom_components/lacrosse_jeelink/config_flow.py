@@ -172,6 +172,7 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
     def __init__(self) -> None:
         """Initialize options flow."""
         self._discovered_radio_id: int | None = None
+        self._show_stale_discoveries = True
         self._edit_sensor_key: str | None = None
         self._edit_radio_id: int | None = None
         self._replacement_sensor_key: str | None = None
@@ -456,6 +457,18 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             humidity = sensor["humidity"]
             low_battery = sensor["low_battery"]
             last_seen = sensor.get("last_seen")
+            is_stale = (
+                not isinstance(last_seen, datetime)
+                or now - last_seen >= stale_after
+            )
+            # Only hide stale, unconfigured discoveries. Existing
+            # configured sensors must always remain visible.
+            if (
+                not self._show_stale_discoveries
+                and is_stale
+                and radio_id not in configured_ids
+            ):
+                continue
             if isinstance(last_seen, datetime):
                 age = now - last_seen
                 if age < timedelta(0):
@@ -513,10 +526,24 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
         # Selecting refresh submits the form and rebuilds the choices
         # from the latest received radio packets without reloading Jeelink.
         choices["__refresh__"] = "↻ Refresh discovery list"
+        choices["__toggle_stale__"] = (
+            "Hide stale discoveries (10+ min)"
+            if self._show_stale_discoveries
+            else "Show stale discoveries"
+        )
 
         if user_input is not None:
             selected = user_input["discovered_sensor"]
             if selected == "__refresh__":
+                return await self.async_step_scan_sensor()
+            if selected == "__toggle_stale__":
+                self._show_stale_discoveries = (
+                    not self._show_stale_discoveries
+                )
+                return await self.async_step_scan_sensor()
+            # Never accept a hidden or no-longer-discovered ID from a
+            # stale options form.
+            if selected not in choices:
                 return await self.async_step_scan_sensor()
             radio_id = int(selected)
 
