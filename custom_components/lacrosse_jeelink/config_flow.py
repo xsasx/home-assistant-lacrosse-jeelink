@@ -828,13 +828,25 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
                     and isinstance(packet.get("last_new_battery_seen"), datetime)
                     and started < packet["last_new_battery_seen"] <= now
                 ]
-                if len(candidates) == 1:
+                ignored_ids = {
+                    int(value)
+                    for value in self.config_entry.options.get(
+                        CONF_IGNORED_RADIO_IDS, []
+                    )
+                }
+                # Never silently assign an ignored radio ID to an
+                # existing device. The user must explicitly restore
+                # it through the ignored-sensor management menu first.
+                if any(radio_id in ignored_ids for radio_id in candidates):
+                    errors["base"] = "ignored_radio_id_detected"
+                elif len(candidates) == 1:
                     self._replacement_candidate_id = candidates[0]
                     return await self.async_step_replace_battery_confirm()
-                errors["base"] = (
-                    "multiple_radio_ids" if len(candidates) > 1
-                    else "no_new_radio_id"
-                )
+                else:
+                    errors["base"] = (
+                        "multiple_radio_ids" if len(candidates) > 1
+                        else "no_new_radio_id"
+                    )
 
         return self.async_show_form(
             step_id="replace_battery_scan",
@@ -869,6 +881,15 @@ class LaCrosseJeelinkOptionsFlow(OptionsFlowWithReload):
             for key, item in sensors.items() if key != sensor_key
         ):
             errors["base"] = "radio_id_exists"
+        elif new_id in {
+            int(value)
+            for value in self.config_entry.options.get(
+                CONF_IGNORED_RADIO_IDS, []
+            )
+        }:
+            # Re-check at confirmation time in case the ignored list
+            # changed after the candidate was first discovered.
+            errors["base"] = "ignored_radio_id_detected"
         elif user_input is not None and user_input.get("confirm") is True:
             updated = dict(sensor)
             updated[CONF_RADIO_ID] = new_id
