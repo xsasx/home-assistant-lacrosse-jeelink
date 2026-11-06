@@ -247,14 +247,18 @@ async def async_setup_entry(
     try:
         await hass.async_add_executor_job(lacrosse.open)
         await hass.async_add_executor_job(lacrosse.start_scan)
+        # pylacrosse-ng starts its worker asynchronously. Ensure the first
+        # serial connection succeeds before HA considers setup complete.
+        # A later disconnect is handled by the receiver's auto-reconnect.
+        await hass.async_add_executor_job(lacrosse.wait_until_connected)
     except Exception as err:
         try:
             await hass.async_add_executor_job(lacrosse.close)
         except Exception:
-            pass
+            _LOGGER.exception("Failed to stop JeeLink receiver after setup error")
 
         raise ConfigEntryNotReady(
-            f"Unable to open LaCrosse Jeelink on {device} at {baud} baud"
+            f"Unable to connect to LaCrosse Jeelink on {device} at {baud} baud: {err}"
         ) from err
 
     entry.runtime_data = LaCrosseRuntimeData(
