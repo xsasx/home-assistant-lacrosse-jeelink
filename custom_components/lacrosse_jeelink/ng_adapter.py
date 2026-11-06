@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 import logging
 import threading
+import time
 from typing import Any
 
 from pylacrosse_ng import LaCrosseReading, SensorRegistry, SerialConnection
@@ -105,6 +106,35 @@ class LaCrosseNgAdapter:
     def start_scan(self) -> None:
         """Start reading packets and handling automatic reconnection."""
         self._receiver.start()
+
+    def wait_until_connected(self, timeout: float = 5.0) -> None:
+        """Ensure the background worker opened the port during HA setup.
+
+        start_scan() starts asynchronously and can return even when the USB
+        device is missing. Home Assistant must not report a successful setup
+        before the first connection succeeds. The caller is responsible for
+        close() on failure; HA can then retry via ConfigEntryNotReady.
+        """
+        if timeout <= 0:
+            raise ValueError("timeout must be positive")
+
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if self._receiver.is_connected:
+                return
+            if not self._receiver.is_running:
+                raise ConnectionError(
+                    "JeeLink receiver worker stopped before connecting"
+                )
+            time.sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+
+        if self._receiver.is_connected:
+            return
+        health = self._receiver.health
+        details = health.last_error or "connection not established"
+        raise ConnectionError(
+            f"JeeLink did not connect within {timeout:g}s: {details}"
+        )
 
     def close(self) -> None:
         """Stop the worker and release the serial device."""
