@@ -8,8 +8,6 @@ from datetime import datetime, timezone
 import logging
 from typing import Any
 
-import pylacrosse
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -24,7 +22,7 @@ from .const import (
     DOMAIN,
     PLATFORMS,
 )
-from .receiver import LaCrosseReceiver
+from .ng_adapter import LaCrosseNgAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +36,7 @@ CONF_RAW_TELEGRAM_DIAGNOSTICS = "raw_telegram_diagnostics"
 class LaCrosseRuntimeData:
     """Runtime data for a LaCrosse Jeelink config entry."""
 
-    lacrosse: pylacrosse.LaCrosse
+    lacrosse: LaCrosseNgAdapter
 
     # Includes configured and unconfigured radio sensors.
     discovered_sensors: dict[int, dict[str, Any]] = field(
@@ -71,7 +69,7 @@ async def async_setup_entry(
         is True
     )
 
-    lacrosse = LaCrosseReceiver(
+    lacrosse = LaCrosseNgAdapter(
         device,
         baud,
         raw_diagnostics=raw_diagnostics_enabled,
@@ -85,7 +83,7 @@ async def async_setup_entry(
         )
     else:
         _LOGGER.debug(
-            "LaCrosse Jeelink using shared receiver"
+            "LaCrosse Jeelink beta using pylacrosse-ng adapter"
         )
 
     discovered_sensors: dict[int, dict[str, Any]] = {}
