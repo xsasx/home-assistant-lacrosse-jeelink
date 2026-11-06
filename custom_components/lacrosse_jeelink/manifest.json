@@ -17,5 +17,5 @@
     "pylacrosse>=0.4",
     "pylacrosse-ng==0.1.0b1"
   ],
-  "version": "0.3.0"
+  "version": "0.4.0-beta.1"
 }
