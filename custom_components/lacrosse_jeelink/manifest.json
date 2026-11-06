@@ -10,12 +10,10 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/xsasx/home-assistant-lacrosse-jeelink/issues",
   "loggers": [
-    "pylacrosse",
-    "pylacrosse_ng"
+    "pylacrosse"
   ],
   "requirements": [
-    "pylacrosse>=0.4",
-    "pylacrosse-ng @ git+https://github.com/xsasx/pylacrosse-ng.git@b448293a2469cbc005add866d8087f7dd945d194"
+    "pylacrosse>=0.4"
   ],
   "version": "0.3.0"
 }
