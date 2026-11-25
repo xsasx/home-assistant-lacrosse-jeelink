@@ -32,6 +32,7 @@ CONF_HUMIDITY_MODE = "humidity_mode"
 HUMIDITY_MODE_MANUAL = "manual"
 CONF_MULTI_CHANNEL = "multi_channel"
 CONF_RAW_TELEGRAM_DIAGNOSTICS = "raw_telegram_diagnostics"
+DISCOVERY_CACHE = f"{DOMAIN}_discovery_cache"
 
 
 @dataclass
@@ -88,7 +89,14 @@ async def async_setup_entry(
             "LaCrosse Jeelink using shared receiver"
         )
 
-    discovered_sensors: dict[int, dict[str, Any]] = {}
+    # Saving options reloads the receiver; the scanner must retain its finds.
+    discovery_cache = hass.data.setdefault(DISCOVERY_CACHE, {})
+    receiver_settings = (device, baud)
+    cached_settings, discovered_sensors = discovery_cache.get(
+        entry.entry_id, (receiver_settings, {})
+    )
+    if cached_settings != receiver_settings:
+        discovered_sensors = {}
 
     humidity_restorations_in_progress: set[str] = set()
 
@@ -259,6 +267,7 @@ async def async_setup_entry(
             f"Unable to open LaCrosse Jeelink on {device} at {baud} baud"
         ) from err
 
+    discovery_cache[entry.entry_id] = (receiver_settings, discovered_sensors)
     entry.runtime_data = LaCrosseRuntimeData(
         lacrosse=lacrosse,
         discovered_sensors=discovered_sensors,
@@ -318,3 +327,11 @@ async def async_unload_entry(
             )
 
     return unload_ok
+
+
+async def async_remove_entry(
+    hass: HomeAssistant,
+    entry: LaCrosseConfigEntry,
+) -> None:
+    """Discard discoveries when the config entry is removed."""
+    hass.data.get(DISCOVERY_CACHE, {}).pop(entry.entry_id, None)
